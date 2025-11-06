@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import { loadCommands } from "./commands/cli.js";
+import { loadCommands } from "./commands/commands.js";
 
 program
   .version("1.0.0")
