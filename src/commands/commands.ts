@@ -10,6 +10,7 @@ export const loadCommands = (program: Command) => {
       const bucketName = `${basename}-${Date.now()}`;
       const client = new S3ClientService();
       await client.createBucket(bucketName);
+      await client.enableStaticHosting(bucketName);
     });
 
   program
@@ -23,9 +24,12 @@ export const loadCommands = (program: Command) => {
     .action(async (options) => {
       const bucketName = `${options.bucket}`;
       const localDirectory = `${options.directory}`;
+      const client = new S3ClientService();
 
-      console.log(`Bucket name is ${bucketName}`);
-      console.log(`The name of the directory is ${localDirectory}`);
+      await client.emptyBucket(bucketName);
+      console.log(`${bucketName} emptied.`);
+      await client.syncDirectory(bucketName, localDirectory);
+      console.log(`${bucketName} synced with ${localDirectory}`);
     });
 
   program
@@ -35,6 +39,7 @@ export const loadCommands = (program: Command) => {
     .action(async (bucketName) => {
       // LOOK INTO COMMANDER PROMPT TOOLS
       const client = new S3ClientService();
+      await client.emptyBucket(bucketName);
       await client.destroyBucket(bucketName);
     });
 };
