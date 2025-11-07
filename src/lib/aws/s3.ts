@@ -3,8 +3,13 @@ import {
   DeleteBucketCommand,
   DeleteObjectCommand,
   paginateListObjectsV2,
+  PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+
+import path from "node:path";
+import mime from "mime";
+import { forFileInDirectory } from "../files.js";
 
 export default class S3ClientService {
   client: S3Client;
@@ -40,5 +45,27 @@ export default class S3ClientService {
         }
       }
     }
+  }
+
+  async syncDirectory(
+    bucketName: string,
+    localDirectory: string
+  ): Promise<void> {
+    await forFileInDirectory(
+      localDirectory,
+      async (relativePath: string, contents: string) => {
+        const Key = relativePath.split(path.sep).join("/");
+
+        console.log(`Uploading ${Key}`);
+        await this.client.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key,
+            Body: contents,
+            ContentType: mime.getType(Key) || undefined,
+          })
+        );
+      }
+    );
   }
 }
