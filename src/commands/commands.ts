@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import S3ClientService from "../lib/aws/s3.js";
 
 export const loadCommands = (program: Command) => {
   program
@@ -7,8 +8,8 @@ export const loadCommands = (program: Command) => {
     .argument("<basename>", "Base name for bucket")
     .action(async (basename) => {
       const bucketName = `${basename}-${Date.now()}`;
-
-      console.log(bucketName);
+      const client = new S3ClientService();
+      await client.createBucket(bucketName);
     });
 
   program
@@ -31,9 +32,9 @@ export const loadCommands = (program: Command) => {
     .command("destroy")
     .description("Empties and tears down S3 Bucket")
     .argument("<bucketname>", "Full name of bucket to be destroyed")
-    .action(async (bucketname) => {
+    .action(async (bucketName) => {
       // LOOK INTO COMMANDER PROMPT TOOLS
-      const bucket = bucketname;
-      console.log(`${bucket} successfully destroyed`);
+      const client = new S3ClientService();
+      await client.destroyBucket(bucketName);
     });
 };
