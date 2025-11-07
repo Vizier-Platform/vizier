@@ -30,7 +30,8 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.926.0",
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "mime": "^4.1.0"
   },
   "bin": {
     "vizier": "./dist/index.js"
