@@ -2,7 +2,10 @@ import {
   CreateBucketCommand,
   DeleteBucketCommand,
   DeleteObjectCommand,
+  DeletePublicAccessBlockCommand,
   paginateListObjectsV2,
+  PutBucketPolicyCommand,
+  PutBucketWebsiteCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -66,6 +69,43 @@ export default class S3ClientService {
           })
         );
       }
+    );
+  }
+
+  async enableStaticHosting(bucketName: string): Promise<void> {
+    await this.client.send(
+      new PutBucketWebsiteCommand({
+        Bucket: bucketName,
+        WebsiteConfiguration: {
+          IndexDocument: {
+            Suffix: `index.html`, // HARD-CODED FOR TESTING
+          },
+        },
+      })
+    );
+    await this.client.send(
+      new DeletePublicAccessBlockCommand({ Bucket: bucketName })
+    );
+
+    await this.client.send(
+      new PutBucketPolicyCommand({
+        Bucket: bucketName,
+        Policy: `{
+      "Version":"2012-10-17",
+      "Statement":[{
+        "Sid":"PublicReadGetObject",
+        "Effect":"Allow",
+        "Principal":"*",
+        "Action":["s3:GetObject"],
+        "Resource":["arn:aws:s3:::${bucketName}/*"]
+      }]
+    }`,
+      })
+    );
+    console.log("Static hosting enabled");
+    // FIXME: hard coded region
+    console.log(
+      `Static website available at http://${bucketName}.s3-website-us-east-1.amazonaws.com`
     );
   }
 }
