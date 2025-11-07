@@ -5,8 +5,6 @@ import {
   paginateListObjectsV2,
   S3Client,
 } from "@aws-sdk/client-s3";
-import path from "node:path";
-import fsPromises from "node:fs/promises";
 
 export default class S3ClientService {
   client: S3Client;
