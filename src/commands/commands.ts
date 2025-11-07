@@ -33,6 +33,16 @@ export const loadCommands = (program: Command) => {
     });
 
   program
+    .command("empty")
+    .description("Empties out specific bucket")
+    .argument("<bucketName>", "Name of bucket to be emptied")
+    .action(async (bucketName) => {
+      const client = new S3ClientService();
+      await client.emptyBucket(bucketName);
+      console.log(`${bucketName} emptied.`);
+    });
+
+  program
     .command("destroy")
     .description("Empties and tears down S3 Bucket")
     .argument("<bucketname>", "Full name of bucket to be destroyed")
