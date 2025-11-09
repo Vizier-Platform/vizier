@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import chalk from "chalk";
 import S3ClientService from "../lib/aws/s3.js";
 
 export const loadCommands = (program: Command) => {
@@ -27,9 +28,19 @@ export const loadCommands = (program: Command) => {
       const client = new S3ClientService();
 
       await client.emptyBucket(bucketName);
-      console.log(`${bucketName} emptied.`);
+      console.log(chalk.yellow(`${bucketName} emptied.`));
       await client.syncDirectory(bucketName, localDirectory);
-      console.log(`${bucketName} synced with ${localDirectory}`);
+      console.log(chalk.green(`${bucketName} synced with ${localDirectory}`));
+    });
+
+  program
+    .command("empty")
+    .description("Empties out specific bucket")
+    .argument("<bucketName>", "Name of bucket to be emptied")
+    .action(async (bucketName) => {
+      const client = new S3ClientService();
+      await client.emptyBucket(bucketName);
+      console.log(chalk.green(`${bucketName} emptied.`));
     });
 
   program
@@ -41,5 +52,6 @@ export const loadCommands = (program: Command) => {
       const client = new S3ClientService();
       await client.emptyBucket(bucketName);
       await client.destroyBucket(bucketName);
+      console.log(chalk.green(`${bucketName} was destroyed`));
     });
 };
