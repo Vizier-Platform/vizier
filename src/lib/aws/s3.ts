@@ -11,6 +11,7 @@ import {
 } from "@aws-sdk/client-s3";
 
 import path from "node:path";
+import chalk from "chalk";
 import mime from "mime";
 import { forFileInDirectory } from "../files.js";
 
@@ -21,12 +22,11 @@ export default class S3ClientService {
   }
   async createBucket(bucketName: string): Promise<void> {
     await this.client.send(new CreateBucketCommand({ Bucket: bucketName }));
-    console.log(`${bucketName} was created.`);
+    console.log(chalk.green(`${bucketName} was created.`));
   }
 
   async destroyBucket(bucketName: string): Promise<void> {
     await this.client.send(new DeleteBucketCommand({ Bucket: bucketName }));
-    console.log(`${bucketName} was destroyed`);
   }
 
   async emptyBucket(bucketName: string): Promise<void> {
@@ -38,7 +38,7 @@ export default class S3ClientService {
     for await (const page of paginator) {
       if (page.Contents) {
         for (const obj of page.Contents) {
-          console.log(`Deleting ${obj.Key}`);
+          console.log(chalk.yellow(`Deleting ${obj.Key}`));
           await this.client.send(
             new DeleteObjectCommand({
               Bucket: bucketName,
@@ -59,7 +59,7 @@ export default class S3ClientService {
       async (relativePath: string, contents: string) => {
         const Key = relativePath.split(path.sep).join("/");
 
-        console.log(`Uploading ${Key}`);
+        console.log(chalk.yellow(`Uploading ${Key}`));
         await this.client.send(
           new PutObjectCommand({
             Bucket: bucketName,
@@ -102,10 +102,12 @@ export default class S3ClientService {
     }`,
       })
     );
-    console.log("Static hosting enabled");
+    console.log(chalk.green("Static hosting enabled"));
     // FIXME: hard coded region
     console.log(
-      `Static website available at http://${bucketName}.s3-website-us-east-1.amazonaws.com`
+      chalk.green(
+        `Static website available at http://${bucketName}.s3-website-us-east-1.amazonaws.com`
+      )
     );
   }
 }
