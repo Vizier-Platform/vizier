@@ -30,6 +30,7 @@ export const getAllFilePaths = async (
 
   await Promise.all(
     files.map(async (file) => {
+      if (file === ".git" || file === "node_modules") return;
       const absolutePath = path.resolve(directoryPath, file);
       const stats = await fsPromises.stat(absolutePath);
       if (stats.isFile()) {
