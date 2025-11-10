@@ -1,24 +1,10 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import S3ClientService from "../lib/aws/s3.js";
-import { execFile } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-
-function sh(cmd: string, args: string[]) {
-  return new Promise<void>((resolve, reject) => {
-    execFile(cmd, args, (error, stdout, stderr) => {
-      if (error) {
-        console.error(stderr);
-        reject(error);
-      } else {
-        if (stdout.trim()) console.log(stdout);
-        resolve();
-      }
-    });
-  });
-}
+import sh from "../lib/sh.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
