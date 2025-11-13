@@ -22,7 +22,7 @@ export async function deployS3Stack(baseName: string): Promise<void> {
 
     new s3deploy.BucketDeployment(stack, "DeployFiles", {
       // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset("../../../test-site")], // path to your build
+      sources: [s3deploy.Source.asset("test-site")], // path to your build
       destinationBucket: bucket,
     });
 
