@@ -5,6 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
+import { deployS3Stack } from "../lib/aws/cdk-s3.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -13,6 +14,15 @@ async function checkoutRepo(repo: string, ref: string) {
 }
 
 export const loadCommands = (program: Command) => {
+  program
+    .command("deploy")
+    .description("Deploy static site to CloudFormation Stack")
+    .argument("<basename>", "Base name for bucket")
+    .action(async (basename) => {
+      await deployS3Stack(basename);
+      console.log(chalk.green(`Static site live.`));
+    });
+
   program
     .command("create")
     .description("Creates an empty S3 Bucket for static hosting")
