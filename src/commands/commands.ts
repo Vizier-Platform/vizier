@@ -5,7 +5,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
-import { deployS3Stack, destroyStack } from "../lib/aws/cdk-s3.js";
+import { deployS3Stack } from "../lib/aws/cdk-s3.js";
+import { destroyStack } from "../lib/aws/destroyStack.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
