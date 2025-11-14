@@ -3,6 +3,8 @@ import { App, Stack } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
+// Hard coded port for testing
+const PORT = 80;
 
 export async function deployAppServer(): Promise<void> {
   const toolkit = new Toolkit();
@@ -21,26 +23,24 @@ export async function deployAppServer(): Promise<void> {
       enableFargateCapacityProviders: true,
     });
 
-    const loadBalancedFargateService =
-      new ecsPatterns.ApplicationLoadBalancedFargateService(
-        stack,
-        "VizierFargateService",
-        {
-          cluster: cluster as ecs.ICluster,
-          memoryLimitMiB: 1024,
-          desiredCount: 1,
-          cpu: 512,
-          taskImageOptions: {
-            image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"),
-          },
-          minHealthyPercent: 100,
-        }
-      );
+    new ecsPatterns.ApplicationLoadBalancedFargateService(
+      stack,
+      "VizierFargateService",
+      {
+        cluster: cluster as ecs.ICluster,
+        memoryLimitMiB: 1024,
+        desiredCount: 1,
+        cpu: 512,
+        taskImageOptions: {
+          image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"), // test image
+          containerPort: PORT,
+        },
+        minHealthyPercent: 100,
+      }
+    );
 
     return app.synth();
   });
 
   await toolkit.deploy(cloudAssemblySource);
 }
-
-deployAppServer();
