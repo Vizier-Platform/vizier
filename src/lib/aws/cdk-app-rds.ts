@@ -78,5 +78,3 @@ export async function deployDBServer(): Promise<void> {
 
   await toolkit.deploy(cloudAssemblySource);
 }
-
-deployDBServer();
