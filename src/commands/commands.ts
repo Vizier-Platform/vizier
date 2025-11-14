@@ -5,7 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
-import { deployS3Stack } from "../lib/aws/cdk-s3.js";
+import { deployS3Stack, destroyStack } from "../lib/aws/cdk-s3.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -21,6 +21,15 @@ export const loadCommands = (program: Command) => {
     .action(async (basename) => {
       await deployS3Stack(basename);
       console.log(chalk.green(`Static site live.`));
+    });
+
+  program
+    .command("destroyStack")
+    .description("Destroy stack and associated resources.")
+    .argument("<stackname>", "Stack name to be destroyed")
+    .action(async (stackname) => {
+      await destroyStack(stackname);
+      console.log(chalk.yellow(`${stackname} destroyed`));
     });
 
   program
