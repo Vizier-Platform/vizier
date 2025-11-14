@@ -3,6 +3,8 @@ import { App, Stack } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
+import requireDocker from "../requireDocker.js";
+
 // Hard coded port for testing
 const DEFAULT_PORT = 80;
 
@@ -38,6 +40,11 @@ export async function deployAppServer({
       vpc: vpc as ec2.IVpc,
       enableFargateCapacityProviders: true,
     });
+
+    // fromAsset requires docker to be installed with daemon running
+    if (isImageLocal) {
+      requireDocker();
+    }
 
     const image = isImageLocal
       ? ecs.ContainerImage.fromAsset(imagePath)
