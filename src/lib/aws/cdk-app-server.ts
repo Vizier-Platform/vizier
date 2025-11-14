@@ -16,6 +16,11 @@ export async function deployAppServer({
   imagePath,
   containerPort,
 }: AppServerOptions): Promise<void> {
+  // fromAsset requires docker to be installed with daemon running
+  if (isImageLocal) {
+    requireDocker();
+  }
+
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -31,11 +36,6 @@ export async function deployAppServer({
       vpc: vpc as ec2.IVpc,
       enableFargateCapacityProviders: true,
     });
-
-    // fromAsset requires docker to be installed with daemon running
-    if (isImageLocal) {
-      requireDocker();
-    }
 
     const image = isImageLocal
       ? ecs.ContainerImage.fromAsset(imagePath)
