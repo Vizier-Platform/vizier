@@ -2,6 +2,7 @@ import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 
 export async function deployAppServer(): Promise<void> {
   const toolkit = new Toolkit();
@@ -20,30 +21,21 @@ export async function deployAppServer(): Promise<void> {
       enableFargateCapacityProviders: true,
     });
 
-    const taskDefinition = new ecs.FargateTaskDefinition(
-      stack,
-      "VizierFargateClusterTask"
-    );
-
-    taskDefinition.addContainer("web", {
-      image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"),
-    });
-
-    new ecs.FargateService(stack, "FargateService", {
-      cluster: cluster as ecs.ICluster,
-      taskDefinition,
-      minHealthyPercent: 100,
-      capacityProviderStrategies: [
+    const loadBalancedFargateService =
+      new ecsPatterns.ApplicationLoadBalancedFargateService(
+        stack,
+        "VizierFargateService",
         {
-          capacityProvider: "FARGATE_SPOT",
-          weight: 2,
-        },
-        {
-          capacityProvider: "FARGATE",
-          weight: 1,
-        },
-      ],
-    });
+          cluster: cluster as ecs.ICluster,
+          memoryLimitMiB: 1024,
+          desiredCount: 1,
+          cpu: 512,
+          taskImageOptions: {
+            image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"),
+          },
+          minHealthyPercent: 100,
+        }
+      );
 
     return app.synth();
   });
