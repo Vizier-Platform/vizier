@@ -1,5 +1,5 @@
 // Import required packages
-import { Toolkit } from "@aws-cdk/toolkit-lib";
+import { StackSelectionStrategy, Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, RemovalPolicy, Stack } from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
@@ -30,4 +30,21 @@ export async function deployS3Stack(baseName: string): Promise<void> {
   });
 
   await toolkit.deploy(cloudAssemblySource);
+}
+
+export async function destroyStack(stackName: string) {
+  const toolkit = new Toolkit();
+
+  const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
+    const app = new App();
+    new Stack(app, stackName);
+    return app.synth();
+  });
+
+  await toolkit.destroy(cloudAssemblySource, {
+    stacks: {
+      strategy: StackSelectionStrategy.PATTERN_MUST_MATCH,
+      patterns: [stackName],
+    },
+  });
 }
