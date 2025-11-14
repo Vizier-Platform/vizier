@@ -1,56 +1,31 @@
 # vizier
 
-## Create .github/workflows/deploy.yml at top level of user repo with this code
+---DEPLOYING STATIC SITE ON S3 CONTAINER---
 
-name: Deploy static site
+Set up AWS CLI with your AWS account  
+Navigate to vizier folder
 
-on:
-push:
-branches: - main
+npm install  
+//OPTIONAL: exit and re-enter folder
 
-jobs:
-deploy:
-runs-on: ubuntu-latest
-env:
-AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-AWS_REGION: ${{ secrets.AWS_REGION }}
-DEPLOY_BUCKET: ${{ secrets.DEPLOY_BUCKET }}
-DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
-steps: - name: Checkout repository
-uses: actions/checkout@v4
+npm link  
+tsc
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+vizier create my-bucket  
+`my-bucket-213451254 was created`
 
-      - name: Install repo dependencies
-        run: npm ci
+vizier sync -b my-bucket-213451254 -d  
+path-to-local-directory
 
-      - name: Checkout Vizier CLI
-        uses: actions/checkout@v4
-        with:
-          repository: Vizier-Platform/vizier
-          token: ${{ secrets.VIZIER_REPO_TOKEN }} #can delete this line if the repo is public
-          path: vizier-cli
-          ref: githubconnect-caleb #can delete this line (or change to ref: main) after pushing to main
+vizier destroy my-bucket-213451254
 
-      - name: Install Vizier dependencies
-        run: npm ci
-        working-directory: vizier-cli
+---DEPLOYING STATIC SITE WITH CDK---  
+Hard code local directory of code to be deployed, with `/vizier/` as the root
 
-      - name: Build Vizier CLI
-        run: npm run build
-        working-directory: vizier-cli
+RUN:  
+npm install  
+cdk bootstrap aws://my-aws-id-numbers us-east-1
 
-      - name: Deploy with vizier
-        run: |
-          if [ -z "$DEPLOY_BUCKET" ]; then
-            echo "DEPLOY_BUCKET secret must be set." >&2
-            exit 1
-          fi
-          DEPLOY_PATH="${DEPLOY_DIR:-.}"
-          node vizier-cli/dist/index.js sync --bucket "$DEPLOY_BUCKET" --directory "$DEPLOY_PATH"
+vizier deploy my-bucket-name
 
----
+delete via console
