@@ -5,26 +5,17 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import requireDocker from "../requireDocker.js";
 
-// Hard coded port for testing
-const DEFAULT_PORT = 80;
-
 interface AppServerOptions {
   isImageLocal: boolean;
   imagePath: string;
   containerPort: number;
 }
 
-const DEFAULT_APP_SERVER_OPTIONS: AppServerOptions = {
-  isImageLocal: false,
-  imagePath: "nginxdemos/hello",
-  containerPort: DEFAULT_PORT,
-};
-
 export async function deployAppServer({
   isImageLocal,
   imagePath,
   containerPort,
-}: AppServerOptions = DEFAULT_APP_SERVER_OPTIONS): Promise<void> {
+}: AppServerOptions): Promise<void> {
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
