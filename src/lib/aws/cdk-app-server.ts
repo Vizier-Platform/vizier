@@ -14,10 +14,10 @@ export async function deployAppServer(): Promise<void> {
       maxAzs: 2, // Use 2 availability zones
     });
 
-    // Not working
-    // const cluster = new ecs.Cluster(stack, "Cluster", {
-    //   vpc,
-    // });
+    // Bandaid solution, look into fixing 'exactOptionalPropertyTypes' error
+    const cluster = new ecs.Cluster(stack, "Cluster", {
+      vpc: vpc as ec2.IVpc,
+    });
 
     return app.synth();
   });
