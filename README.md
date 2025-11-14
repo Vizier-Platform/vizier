@@ -26,6 +26,6 @@ RUN:
 npm install  
 cdk bootstrap aws://my-aws-id-numbers us-east-1
 
-vizier deploy my-bucket-name
+vizier deploy my-stack-name
 
-delete via console
+vizier destroy my-stack-name
