@@ -18,7 +18,7 @@ export async function deployAppServer({
 }: AppServerOptions): Promise<void> {
   // fromAsset requires docker to be installed with daemon running
   if (isImageLocal) {
-    requireDocker();
+    await requireDocker();
   }
 
   const toolkit = new Toolkit();

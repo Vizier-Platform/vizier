@@ -1,12 +1,12 @@
 import sh from "./sh.js";
 
-export default function requireDocker() {
+export default async function requireDocker() {
   try {
-    sh("docker", ["-v"]);
+    await sh("docker", ["-v"]);
   } catch (error) {
-    console.error(
+    console.error(error);
+    throw new Error(
       "Docker does not appear to be running. Please start the Docker daemon and try again."
     );
-    throw error;
   }
 }
