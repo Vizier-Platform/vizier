@@ -28,4 +28,4 @@ cdk bootstrap aws://my-aws-id-numbers us-east-1
 
 vizier deploy my-stack-name
 
-vizier destroy my-stack-name
+vizier destroyStack my-stack-name
