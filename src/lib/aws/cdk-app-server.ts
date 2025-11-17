@@ -3,10 +3,24 @@ import { App, Stack } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
-// Hard coded port for testing
-const PORT = 80;
+import requireDocker from "../requireDocker.js";
 
-export async function deployAppServer(): Promise<void> {
+interface AppServerOptions {
+  isImageLocal: boolean;
+  imagePath: string;
+  containerPort: number;
+}
+
+export async function deployAppServer({
+  isImageLocal,
+  imagePath,
+  containerPort,
+}: AppServerOptions): Promise<void> {
+  // fromAsset requires docker to be installed with daemon running
+  if (isImageLocal) {
+    await requireDocker();
+  }
+
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -23,6 +37,10 @@ export async function deployAppServer(): Promise<void> {
       enableFargateCapacityProviders: true,
     });
 
+    const image = isImageLocal
+      ? ecs.ContainerImage.fromAsset(imagePath)
+      : ecs.ContainerImage.fromRegistry(imagePath);
+
     new ecsPatterns.ApplicationLoadBalancedFargateService(
       stack,
       "VizierFargateService",
@@ -32,8 +50,8 @@ export async function deployAppServer(): Promise<void> {
         desiredCount: 1,
         cpu: 512,
         taskImageOptions: {
-          image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"), // test image
-          containerPort: PORT,
+          image: image,
+          containerPort: containerPort,
         },
         minHealthyPercent: 100,
       }
