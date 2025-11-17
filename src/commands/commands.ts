@@ -8,6 +8,7 @@ import sh from "../lib/sh.js";
 import { deployS3Stack } from "../lib/aws/cdk-s3.js";
 import { destroyStack } from "../lib/aws/destroyStack.js";
 import { writeStoredProperties } from "../lib/outputs.js";
+import type { Config } from "../types/index.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -23,12 +24,13 @@ export const loadCommands = (program: Command) => {
     .requiredOption("-d, --directory <relative path to asset directory>")
     .action(async (options) => {
       const { name, directory } = options;
-      const projectInfo = {
+      const config: Config = {
         projectName: name,
+        projectId: `${name}-${Date.now()}`,
         assetDirectory: directory,
       };
 
-      writeStoredProperties("config.json", projectInfo);
+      writeStoredProperties("config.json", config);
 
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
