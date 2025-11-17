@@ -9,8 +9,8 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import path from "node:path";
 import S3ClientService from "./s3.js";
-import { readStoredProperties, writeStoredProperties } from "../outputs.js";
-import type { Config } from "../../types/index.js";
+import { readProperties, writeProperties } from "../outputs.js";
+import { configSchema, outputsSchema } from "../../types/index.js";
 
 async function getBucketNameFromStack(
   stackName: string
@@ -29,22 +29,21 @@ async function getBucketNameFromStack(
 }
 
 export async function deployS3Stack(baseName: string): Promise<void> {
-  const { projectId, assetDirectory } = readStoredProperties(
-    "config.json"
-  ) as Config;
+  const { projectId, assetDirectory } = configSchema.parse(
+    readProperties("config.json")
+  );
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
-  const storedOutputs = readStoredProperties("outputs.json");
+  const outputs = readProperties("outputs.json");
+  const parsedOutputs = outputsSchema.safeParse(outputs);
 
-  if (
-    storedOutputs &&
-    "bucketName" in storedOutputs &&
-    typeof storedOutputs.bucketName === "string"
-  ) {
+  if (parsedOutputs.success) {
     const s3Service = new S3ClientService();
+
     await s3Service.syncDirectory(
-      storedOutputs.bucketName,
+      parsedOutputs.data.bucketName,
       absoluteAssetDirectory
     );
+
     return;
   }
 
@@ -84,5 +83,5 @@ export async function deployS3Stack(baseName: string): Promise<void> {
     throw new Error("Unable to determine deployed bucket name");
   }
 
-  writeStoredProperties("outputs.json", { bucketName });
+  writeProperties("outputs.json", { bucketName });
 }

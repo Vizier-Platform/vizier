@@ -7,7 +7,7 @@ import path from "node:path";
 import sh from "../lib/sh.js";
 import { deployS3Stack } from "../lib/aws/cdk-s3.js";
 import { destroyStack } from "../lib/aws/destroyStack.js";
-import { writeStoredProperties } from "../lib/outputs.js";
+import { writeProperties } from "../lib/outputs.js";
 import type { Config } from "../types/index.js";
 
 async function checkoutRepo(repo: string, ref: string) {
@@ -30,7 +30,7 @@ export const loadCommands = (program: Command) => {
         assetDirectory: directory,
       };
 
-      writeStoredProperties("config.json", config);
+      writeProperties("config.json", config);
 
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");

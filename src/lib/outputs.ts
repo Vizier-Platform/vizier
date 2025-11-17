@@ -4,7 +4,7 @@ import path from "node:path";
 const VIZIER_DIR = path.join(process.cwd(), ".vizier");
 const OUTPUTS_PATH = path.join(VIZIER_DIR, "outputs.json");
 
-export function readStoredProperties(fileName: string): object | undefined {
+export function readProperties(fileName: string): object | undefined {
   const absolutePath = path.join(VIZIER_DIR, fileName);
 
   if (!fs.existsSync(absolutePath)) {
@@ -19,10 +19,7 @@ export function readStoredProperties(fileName: string): object | undefined {
   }
 }
 
-export function writeStoredProperties(
-  fileName: string,
-  properties: object
-): void {
+export function writeProperties(fileName: string, properties: object): void {
   fs.mkdirSync(VIZIER_DIR, { recursive: true });
   fs.writeFileSync(
     path.join(VIZIER_DIR, fileName),
@@ -30,7 +27,7 @@ export function writeStoredProperties(
   );
 }
 
-export function clearStoredOutputs(): void {
+export function clearOutputs(): void {
   if (!fs.existsSync(OUTPUTS_PATH)) {
     return;
   }

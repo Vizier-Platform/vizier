@@ -1,9 +1,14 @@
-export interface Config {
-  projectName: string;
-  projectId: string;
-  assetDirectory: string;
-}
+import { z } from "zod";
 
-export interface StoredOutputs {
-  bucketName: string;
-}
+export const configSchema = z.object({
+  projectName: z.string(),
+  projectId: z.string(),
+  assetDirectory: z.string(),
+});
+
+export const outputsSchema = z.object({
+  bucketName: z.string(),
+});
+
+export type Config = z.infer<typeof configSchema>;
+export type Outputs = z.infer<typeof outputsSchema>;

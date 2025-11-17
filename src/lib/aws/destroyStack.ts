@@ -1,6 +1,6 @@
 import { StackSelectionStrategy, Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
-import { clearStoredOutputs } from "../outputs.js";
+import { clearOutputs } from "../outputs.js";
 
 export async function destroyStack(stackName: string) {
   const toolkit = new Toolkit();
@@ -18,5 +18,5 @@ export async function destroyStack(stackName: string) {
     },
   });
 
-  clearStoredOutputs();
+  clearOutputs();
 }
