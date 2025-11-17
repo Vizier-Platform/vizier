@@ -21,9 +21,15 @@ export function readStoredOutputs(): StoredOutputs | undefined {
   }
 }
 
-export function writeStoredOutputs(outputs: StoredOutputs): void {
+export function writeStoredProperties(
+  fileName: string,
+  properties: object
+): void {
   fs.mkdirSync(VIZIER_DIR, { recursive: true });
-  fs.writeFileSync(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
+  fs.writeFileSync(
+    path.join(VIZIER_DIR, fileName),
+    JSON.stringify(properties, null, 2)
+  );
 }
 
 export function clearStoredOutputs(): void {

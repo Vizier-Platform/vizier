@@ -9,10 +9,10 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import path from "node:path";
 import S3ClientService from "./s3.js";
-import { readStoredOutputs, writeStoredOutputs } from "../outputs.js";
+import { readStoredOutputs, writeStoredProperties } from "../outputs.js";
 
-const STACK_NAME = "VizierStack2";
-const ASSET_DIRECTORY = path.join(process.cwd(), "test-site");
+const STACK_NAME = "VizierStack2"; //grab from .vizier/config.json later
+const ASSET_DIRECTORY = path.join(process.cwd(), "test-site"); //grab from .vizier/config.json later
 
 async function getBucketNameFromStack(
   stackName: string
@@ -79,5 +79,5 @@ export async function deployS3Stack(baseName: string): Promise<void> {
     throw new Error("Unable to determine deployed bucket name");
   }
 
-  writeStoredOutputs({ bucketName });
+  writeStoredProperties("outputs.json", { bucketName });
 }
