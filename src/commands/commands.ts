@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
 import { deployS3Stack } from "../lib/aws/cdk-s3.js";
-import { destroyStack } from "../lib/aws/destroyStack.js";
+import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 import { writeProperties } from "../lib/outputs.js";
 import type { Config } from "../types/index.js";
 
@@ -39,19 +39,17 @@ export const loadCommands = (program: Command) => {
   program
     .command("deploy")
     .description("Deploy static site to CloudFormation Stack")
-    .argument("<basename>", "Base name for bucket")
-    .action(async (basename) => {
-      await deployS3Stack(basename);
+    .action(async () => {
+      await deployS3Stack();
       console.log(chalk.green(`Static site live.`));
     });
 
   program
     .command("destroyStack")
     .description("Destroy stack and associated resources.")
-    .argument("<stackname>", "Stack name to be destroyed")
-    .action(async (stackname) => {
-      await destroyStack(stackname);
-      console.log(chalk.yellow(`${stackname} destroyed`));
+    .action(async () => {
+      await destroyStackFromConfig();
+      console.log(chalk.yellow("Stack destroyed."));
     });
 
   program

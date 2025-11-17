@@ -28,7 +28,7 @@ async function getBucketNameFromStack(
   return bucketOutput?.OutputValue;
 }
 
-export async function deployS3Stack(baseName: string): Promise<void> {
+export async function deployS3Stack(): Promise<void> {
   const { projectId, assetDirectory } = configSchema.parse(
     readProperties("config.json")
   );
@@ -53,7 +53,7 @@ export async function deployS3Stack(baseName: string): Promise<void> {
     const app = new App();
     const stack = new Stack(app, projectId);
 
-    const bucket = new s3.Bucket(stack, baseName, {
+    const bucket = new s3.Bucket(stack, "static-site", {
       versioned: true,
       websiteIndexDocument: "index.html",
       publicReadAccess: true,
