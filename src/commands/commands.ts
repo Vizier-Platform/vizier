@@ -9,6 +9,8 @@ import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 import { writeProperties } from "../lib/outputs.js";
 import type { Config } from "../types/index.js";
+import enquirer from "enquirer";
+const { prompt } = enquirer;
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -20,10 +22,20 @@ export const loadCommands = (program: Command) => {
   program
     .command("init")
     .description("Initialize Vizier in your project root")
-    .requiredOption("-n, --name <project name>")
-    .requiredOption("-d, --directory <relative path to asset directory>")
-    .action(async (options) => {
-      const { name, directory } = options;
+    .action(async () => {
+      const response = await prompt<{ name: string; directory: string }>([
+        {
+          type: "input",
+          name: "name",
+          message: "What is the project name?",
+        },
+        {
+          type: "input",
+          name: "directory",
+          message: "What is the relative path to the asset directory?",
+        },
+      ]);
+      const { name, directory } = response;
       const config: Config = {
         projectName: name,
         projectId: `${name}-${Date.now()}`,
