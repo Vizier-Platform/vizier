@@ -7,8 +7,16 @@ import path from "node:path";
 import sh from "../lib/sh.js";
 import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
-import { writeProperties } from "../lib/outputs.js";
-import type { Config } from "../types/index.js";
+import { readProperties, writeProperties } from "../lib/outputs.js";
+import {
+  type ConfigBase,
+  type ConfigFront,
+  type Config,
+  type StackType,
+  type ConfigFrontBack,
+  configSchema,
+} from "../types/index.js";
+import { input, select } from "@inquirer/prompts";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -20,18 +28,83 @@ export const loadCommands = (program: Command) => {
   program
     .command("init")
     .description("Initialize Vizier in your project root")
-    .requiredOption("-n, --name <project name>")
-    .requiredOption("-d, --directory <relative path to asset directory>")
-    .action(async (options) => {
-      const { name, directory } = options;
-      const config: Config = {
-        projectName: name,
-        projectId: `${name}-${Date.now()}`,
-        assetDirectory: directory,
+    .action(async () => {
+      const projectName = await input({
+        message: "What is the project name?",
+        required: true,
+      });
+      const projectId = `${projectName}-${Date.now()}`;
+
+      const stackType: StackType = await select<StackType>({
+        message: "Select project type",
+        choices: [
+          {
+            name: "static site",
+            value: "front",
+            description: "A static site",
+          },
+          {
+            name: "frontend + backend",
+            value: "front+back",
+            description: "A static site with backend (coming soon)",
+          },
+        ],
+      });
+
+      const configBase: ConfigBase = {
+        projectName,
+        projectId,
+        stackType,
       };
 
-      writeProperties("config.json", config);
+      let config: Config;
 
+      switch (stackType) {
+        case "front": {
+          const directory = await input({
+            message: "What is the relative path to the asset directory?",
+            required: true,
+          });
+          const frontConfig: ConfigFront = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            assetDirectory: directory,
+          };
+          config = frontConfig;
+          break;
+        }
+        case "front+back": {
+          const directory = await input({
+            message: "What is the relative path to the asset directory?",
+            required: true,
+          });
+          const dockerfileDirectory = await input({
+            message: "What is the relative path to the Dockerfile?",
+            required: true,
+          });
+          const frontBackConfig: ConfigFrontBack = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            assetDirectory: directory,
+            dockerfileDirectory,
+          };
+          config = frontBackConfig;
+
+          console.error(
+            chalk.red("front+back stack type is not yet implemented.")
+          );
+          process.exit(1);
+
+          break;
+        }
+        default: {
+          const unhandledType: never = stackType;
+          console.error(chalk.red(`Unhandled stack type ${unhandledType}`));
+          process.exit(1);
+        }
+      }
+
+      writeProperties("config.json", config);
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });
@@ -40,8 +113,28 @@ export const loadCommands = (program: Command) => {
     .command("deploy")
     .description("Deploy static site to CloudFormation Stack")
     .action(async () => {
-      await deployS3StackFromConfig();
-      console.log(chalk.green(`Static site live.`));
+      const config: Config = configSchema.parse(readProperties("config.json"));
+      const { stackType } = config;
+
+      switch (stackType) {
+        case "front": {
+          await deployS3StackFromConfig();
+          console.log(chalk.green(`Static site deployed.`));
+          break;
+        }
+        case "front+back": {
+          console.error(
+            chalk.red("front+back stack type is not yet implemented.")
+          );
+          process.exit(1);
+          break;
+        }
+        default: {
+          const unhandledType: never = stackType;
+          console.error(chalk.red(`Unhandled stack type ${unhandledType}`));
+          process.exit(1);
+        }
+      }
     });
 
   program

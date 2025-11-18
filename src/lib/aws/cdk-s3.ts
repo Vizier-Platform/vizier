@@ -12,7 +12,7 @@ import S3ClientService from "./s3.js";
 import { readProperties, writeProperties } from "../outputs.js";
 import {
   type Outputs,
-  configSchema,
+  configFrontSchema,
   outputsSchema,
 } from "../../types/index.js";
 
@@ -33,7 +33,7 @@ async function getBucketNameFromStack(
 }
 
 export async function deployS3StackFromConfig() {
-  const { projectId, assetDirectory } = configSchema.parse(
+  const { projectId, assetDirectory } = configFrontSchema.parse(
     readProperties("config.json")
   );
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
