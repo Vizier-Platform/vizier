@@ -10,9 +10,9 @@ import type {
   ConfigFrontBack,
 } from "../types/index.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("init")
+    .command(commandName)
     .description("Initialize Vizier in your project root")
     .action(async () => {
       const projectName = await input({

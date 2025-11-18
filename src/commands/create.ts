@@ -1,9 +1,9 @@
 import type { Command } from "commander";
 import S3ClientService from "../lib/aws/s3.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("create")
+    .command(commandName)
     .description("Creates an empty S3 Bucket for static hosting")
     .argument("<basename>", "Base name for bucket")
     .action(async (basename) => {

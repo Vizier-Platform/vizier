@@ -4,9 +4,9 @@ import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { readProperties } from "../lib/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("deploy")
+    .command(commandName)
     .description("Deploy static site to CloudFormation Stack")
     .action(async () => {
       const config: Config = configSchema.parse(readProperties("config.json"));

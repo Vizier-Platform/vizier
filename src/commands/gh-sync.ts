@@ -12,9 +12,9 @@ async function checkoutRepo(repo: string, ref: string) {
   return tmp;
 }
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("gh-sync")
+    .command(commandName)
     .description("Uploads github files to S3 Bucket")
     .requiredOption("-r --repo <git_url>", "Public GitHub Repo URL")
     .option("--ref <branch>", "Branch to deploy from (default to main)", "main")

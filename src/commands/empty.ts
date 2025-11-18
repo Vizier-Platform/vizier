@@ -2,9 +2,9 @@ import chalk from "chalk";
 import { Command } from "commander";
 import S3ClientService from "../lib/aws/s3.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("empty")
+    .command(commandName)
     .description("Empties out specific bucket")
     .argument("<bucketName>", "Name of bucket to be emptied")
     .action(async (bucketName) => {

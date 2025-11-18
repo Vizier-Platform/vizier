@@ -10,12 +10,17 @@ import empty from "./empty.js";
 import destroy from "./destroy.js";
 
 export const loadCommands = (program: Command) => {
-  init.load(program);
-  deploy.load(program);
-  destroyStack.load(program);
-  create.load(program);
-  sync.load(program);
-  ghSync.load(program);
-  empty.load(program);
-  destroy.load(program);
+  // command names specified here so that they are
+  // - all visible in one place
+  // - decoupled from behavior definitions
+  // "help" is provided by commander
+
+  init.load(program, "init");
+  deploy.load(program, "deploy");
+  destroyStack.load(program, "destroyStack");
+  create.load(program, "create"); // create bucket
+  sync.load(program, "sync"); // sync bucket
+  ghSync.load(program, "gh-sync"); // clone repository and sync to bucket
+  empty.load(program, "empty"); // empty a bucket
+  destroy.load(program, "destroy"); // destroy bucket
 };

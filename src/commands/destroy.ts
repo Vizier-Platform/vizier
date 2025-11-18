@@ -2,9 +2,9 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import S3ClientService from "../lib/aws/s3.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("destroy")
+    .command(commandName)
     .description("Empties and tears down S3 Bucket")
     .argument("<bucketname>", "Full name of bucket to be destroyed")
     .action(async (bucketName) => {

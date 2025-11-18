@@ -2,9 +2,9 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 
-function load(program: Command) {
+function load(program: Command, commandName: string) {
   program
-    .command("destroyStack")
+    .command(commandName)
     .description("Destroy stack and associated resources.")
     .action(async () => {
       await destroyStackFromConfig();
