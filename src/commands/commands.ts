@@ -8,8 +8,14 @@ import sh from "../lib/sh.js";
 import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 import { writeProperties } from "../lib/outputs.js";
-import type { ConfigBase, ConfigFront } from "../types/index.js";
-import enquirer from "enquirer";
+import type {
+  ConfigBase,
+  ConfigFront,
+  FullConfig,
+  StackType,
+} from "../types/index.js";
+// import enquirer from "enquirer";
+import { input, select } from "@inquirer/prompts";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -22,33 +28,52 @@ export const loadCommands = (program: Command) => {
     .command("init")
     .description("Initialize Vizier in your project root")
     .action(async () => {
-      const { projectName } = await enquirer.prompt<{ projectName: string }>([
-        {
-          type: "input",
-          name: "projectName",
-          message: "What is the project name?",
-        },
-      ]);
+      const projectName = await input({
+        message: "What is the project name?",
+        required: true,
+      });
       const projectId = `${projectName}-${Date.now()}`;
+
+      const stackType: StackType = await select<StackType>({
+        message: "Select project type",
+        choices: [
+          {
+            name: "static site",
+            value: "front",
+            description: "A static site",
+          },
+        ],
+      });
+
       const configBase: ConfigBase = {
         projectName,
         projectId,
+        stackType,
       };
 
-      const { directory } = await enquirer.prompt<{ directory: string }>([
-        {
-          type: "input",
-          name: "directory",
-          message: "What is the relative path to the asset directory?",
-        },
-      ]);
-      const config: ConfigFront = {
-        ...configBase,
-        assetDirectory: directory,
-      };
+      let config: FullConfig;
+
+      switch (stackType) {
+        case "front": {
+          const directory = await input({
+            message: "What is the relative path to the asset directory?",
+            required: true,
+          });
+          const frontConfig: ConfigFront = {
+            ...configBase,
+            assetDirectory: directory,
+          };
+          config = frontConfig;
+          break;
+        }
+        default: {
+          const unhandledType: never = stackType;
+          console.error(chalk.red(`Unhandled stack type ${unhandledType}`));
+          process.exit(1);
+        }
+      }
 
       writeProperties("config.json", config);
-
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });
