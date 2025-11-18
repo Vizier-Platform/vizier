@@ -9,7 +9,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 
 // Hard coded port for testing
-const PORT = 80;
+// const PORT = 80;
 
 export async function deployFSApp(): Promise<void> {
   const toolkit = new Toolkit();
@@ -29,7 +29,7 @@ export async function deployFSApp(): Promise<void> {
 
     new s3deploy.BucketDeployment(stack, "DeployFiles", {
       // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset("../../../test-site")], // path to your build
+      sources: [s3deploy.Source.asset("../../../../requestbin/frontend/dist")], // path to your build
       destinationBucket: bucket,
     });
     const vpc = new ec2.Vpc(stack, "MyVpc", {
@@ -42,20 +42,26 @@ export async function deployFSApp(): Promise<void> {
       enableFargateCapacityProviders: true,
     });
 
-    new ecsPatterns.ApplicationLoadBalancedFargateService(
+    const dbSecurityGroup = new ec2.SecurityGroup(stack, "DbSecurityGroup", {
+      vpc: vpc as ec2.IVpc,
+      description: "Allow Postgres from Fargate tasks",
+      allowAllOutbound: true,
+    });
+
+    const fargateSecurityGroup = new ec2.SecurityGroup(
       stack,
-      "VizierFargateService",
+      "FargateSecurityGroup",
       {
-        cluster: cluster as ecs.ICluster,
-        memoryLimitMiB: 1024,
-        desiredCount: 1,
-        cpu: 512,
-        taskImageOptions: {
-          image: ecs.ContainerImage.fromRegistry("nginxdemos/hello"), // test image
-          containerPort: PORT,
-        },
-        minHealthyPercent: 100,
+        vpc: vpc as ec2.IVpc,
+        description: "Fargate tasks security group",
+        allowAllOutbound: true,
       }
+    );
+
+    dbSecurityGroup.addIngressRule(
+      fargateSecurityGroup,
+      ec2.Port.tcp(5432),
+      "Allow Postgres from Fargate tasks"
     );
 
     // Create the RDS instance
@@ -69,14 +75,14 @@ export async function deployFSApp(): Promise<void> {
       ),
       vpc: vpc as ec2.IVpc,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
-      securityGroups: [], // We will add this next
+      securityGroups: [dbSecurityGroup], // We will add this next
       deleteAutomatedBackups: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // NOT recommended for production code
-      databaseName: "mydatabase",
+      databaseName: "requestbin",
       credentials: rds.Credentials.fromGeneratedSecret("postgres"), // Username 'postgres' and an auto-generated password
     });
 
@@ -89,8 +95,48 @@ export async function deployFSApp(): Promise<void> {
       value: dbInstance.secret?.secretValue.toString() ?? "NO_SECRET", // '?? NO_SEC' Bandaid solution
     });
 
+    const dbSecret = dbInstance.secret;
+    if (!dbSecret) {
+      throw new Error("Database secret is undefined");
+    }
+
+    new ecsPatterns.ApplicationLoadBalancedFargateService(
+      stack,
+      "VizierFargateService",
+      {
+        cluster: cluster as ecs.ICluster,
+        memoryLimitMiB: 1024,
+        desiredCount: 1,
+        cpu: 512,
+        securityGroups: [fargateSecurityGroup],
+        publicLoadBalancer: true,
+        taskSubnets: {
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        taskImageOptions: {
+          image: ecs.ContainerImage.fromRegistry(
+            "public.ecr.aws/r6d6a6d7/requestbin-app:latest"
+          ), // test image
+          environment: {
+            DB_HOST: dbInstance.dbInstanceEndpointAddress,
+            DB_PORT: "5432",
+            DB_NAME: "requestbin",
+            DB_USER: "postgres",
+            NODE_ENV: "production",
+          },
+          secrets: {
+            DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, "password"),
+          },
+          containerPort: 3001,
+        },
+        minHealthyPercent: 100,
+      }
+    );
+
     return app.synth();
   });
 
   await toolkit.deploy(cloudAssemblySource);
 }
+
+deployFSApp();
