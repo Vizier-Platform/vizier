@@ -1,0 +1,15 @@
+import chalk from "chalk";
+import type { Command } from "commander";
+import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
+
+function load(program: Command) {
+  program
+    .command("destroyStack")
+    .description("Destroy stack and associated resources.")
+    .action(async () => {
+      await destroyStackFromConfig();
+      console.log(chalk.yellow("Stack destroyed."));
+    });
+}
+
+export default { load };
