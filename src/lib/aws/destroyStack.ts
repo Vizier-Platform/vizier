@@ -7,6 +7,7 @@ export async function destroyStackFromConfig() {
   const { projectId } = configSchema.parse(readProperties("config.json"));
 
   await destroyStack(projectId);
+  clearOutputs();
 }
 
 export async function destroyStack(stackName: string) {
@@ -24,6 +25,4 @@ export async function destroyStack(stackName: string) {
       patterns: [stackName],
     },
   });
-
-  clearOutputs();
 }
