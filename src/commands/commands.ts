@@ -8,9 +8,8 @@ import sh from "../lib/sh.js";
 import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 import { writeProperties } from "../lib/outputs.js";
-import type { Config } from "../types/index.js";
+import type { ConfigBase, ConfigFront } from "../types/index.js";
 import enquirer from "enquirer";
-const { prompt } = enquirer;
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -23,22 +22,28 @@ export const loadCommands = (program: Command) => {
     .command("init")
     .description("Initialize Vizier in your project root")
     .action(async () => {
-      const response = await prompt<{ name: string; directory: string }>([
+      const { projectName } = await enquirer.prompt<{ projectName: string }>([
         {
           type: "input",
-          name: "name",
+          name: "projectName",
           message: "What is the project name?",
         },
+      ]);
+      const projectId = `${projectName}-${Date.now()}`;
+      const configBase: ConfigBase = {
+        projectName,
+        projectId,
+      };
+
+      const { directory } = await enquirer.prompt<{ directory: string }>([
         {
           type: "input",
           name: "directory",
           message: "What is the relative path to the asset directory?",
         },
       ]);
-      const { name, directory } = response;
-      const config: Config = {
-        projectName: name,
-        projectId: `${name}-${Date.now()}`,
+      const config: ConfigFront = {
+        ...configBase,
         assetDirectory: directory,
       };
 
