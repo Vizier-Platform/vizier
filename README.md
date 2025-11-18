@@ -1,6 +1,6 @@
 # Vizier
 
-Vizier is a CLI tool for deploying web applications to AWS, deploying to a user's own account.
+Vizier is a CLI tool for deploying web applications to a user's own AWS account.
 
 ## Installation
 
@@ -26,27 +26,35 @@ Currently:
 
 `vizier help` for command descriptions
 
-### Deploying Static Site on S3 Bucket
+### Deploying Static Site
 
-(Deprecated)
+All commands must be run in the project root.
 
 Setup:
 
-`vizier create my-bucket`  
-`my-bucket-213451254 was created`
+- `vizier init -n <project-name> -d <asset-directory>`  
+  e.g. `vizier init -n TopShop -d dist`
+- `vizier deploy`
 
 Syncing:
 
-`vizier sync -b my-bucket-213451254 -d path-to-local-directory`
+- `vizier deploy`
 
 Teardown:
 
-`vizier destroy my-bucket-213451254`
+- `vizier destroyStack`
+- `rm -rf .vizier`
 
-### Deploying Static Site With CDK
+### Deploying Static Site (Deprecated Way)
 
-Hard code local directory of code to be deployed, with `/vizier/` as the root
+Setup:
 
-`vizier deploy my-stack-name`
+- `vizier create my-bucket`
 
-`vizier destroyStack my-stack-name`
+Syncing:
+
+- `vizier sync -b my-bucket-213451254 -d path-to-local-directory`
+
+Teardown:
+
+- `vizier destroy my-bucket-213451254`
