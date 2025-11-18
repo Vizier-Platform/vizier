@@ -33,7 +33,7 @@ All commands must be run in the project root.
 Setup:
 
 - `vizier init -n <project-name> -d <asset-directory>`  
-  e.g. `vizier init -n TopShop -d dist`
+  e.g. `vizier init -n MyProject -d dist`
 - `vizier deploy`
 
 Syncing:
