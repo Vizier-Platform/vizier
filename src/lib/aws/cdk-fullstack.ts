@@ -1,19 +1,20 @@
-import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, RemovalPolicy, Stack } from "aws-cdk-lib";
+import { App, RemovalPolicy, Stack, CfnOutput } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import * as rds from "aws-cdk-lib/aws-rds";
-import * as cdk from "aws-cdk-lib/core";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import { Toolkit } from "@aws-cdk/toolkit-lib";
 
 // Hard coded port for testing
 // const PORT = 80;
+const SITE_DIR = "../../../../requestbin/frontend/dist";
 
 export async function deployFSApp(): Promise<void> {
   const toolkit = new Toolkit();
-
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
     const stack = new Stack(app, "fullstack-deployment");
@@ -29,7 +30,7 @@ export async function deployFSApp(): Promise<void> {
 
     new s3deploy.BucketDeployment(stack, "DeployFiles", {
       // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset("../../../../requestbin/frontend/dist")], // path to your build
+      sources: [s3deploy.Source.asset(SITE_DIR)], // path to your build
       destinationBucket: bucket,
     });
     const vpc = new ec2.Vpc(stack, "MyVpc", {
@@ -64,7 +65,6 @@ export async function deployFSApp(): Promise<void> {
       "Allow Postgres from Fargate tasks"
     );
 
-    // Create the RDS instance
     const dbInstance = new rds.DatabaseInstance(stack, "DatabaseInstance", {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_17_6,
@@ -79,20 +79,11 @@ export async function deployFSApp(): Promise<void> {
       },
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
-      securityGroups: [dbSecurityGroup], // We will add this next
+      securityGroups: [dbSecurityGroup],
       deleteAutomatedBackups: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // NOT recommended for production code
+      removalPolicy: RemovalPolicy.DESTROY,
       databaseName: "requestbin",
-      credentials: rds.Credentials.fromGeneratedSecret("postgres"), // Username 'postgres' and an auto-generated password
-    });
-
-    // Output the auto-generated password and the DB instance endpoint
-    new cdk.CfnOutput(stack, "DBEndpoint", {
-      value: dbInstance.dbInstanceEndpointAddress,
-    });
-
-    new cdk.CfnOutput(stack, "DBPassword", {
-      value: dbInstance.secret?.secretValue.toString() ?? "NO_SECRET", // '?? NO_SEC' Bandaid solution
+      credentials: rds.Credentials.fromGeneratedSecret("postgres"),
     });
 
     const dbSecret = dbInstance.secret;
@@ -100,38 +91,84 @@ export async function deployFSApp(): Promise<void> {
       throw new Error("Database secret is undefined");
     }
 
-    new ecsPatterns.ApplicationLoadBalancedFargateService(
+    const fargateService =
+      new ecsPatterns.ApplicationLoadBalancedFargateService(
+        stack,
+        "VizierFargateService",
+        {
+          cluster: cluster as ecs.ICluster,
+          memoryLimitMiB: 1024,
+          desiredCount: 1,
+          cpu: 512,
+          securityGroups: [fargateSecurityGroup],
+          publicLoadBalancer: true,
+          taskSubnets: {
+            subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+          },
+          taskImageOptions: {
+            image: ecs.ContainerImage.fromRegistry(
+              "public.ecr.aws/r6d6a6d7/requestbin-app:latest"
+            ), // test image
+            environment: {
+              DB_HOST: dbInstance.dbInstanceEndpointAddress,
+              DB_PORT: "5432",
+              DB_NAME: "requestbin",
+              DB_USER: "postgres",
+              NODE_ENV: "production",
+            },
+            secrets: {
+              DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, "password"),
+            },
+            containerPort: 3001,
+          },
+          minHealthyPercent: 100,
+        }
+      );
+
+    fargateService.targetGroup.configureHealthCheck({
+      path: "/health",
+      healthyHttpCodes: "200-399",
+    });
+
+    const distribution = new cloudfront.Distribution(
       stack,
-      "VizierFargateService",
+      "FullStackDistribution",
       {
-        cluster: cluster as ecs.ICluster,
-        memoryLimitMiB: 1024,
-        desiredCount: 1,
-        cpu: 512,
-        securityGroups: [fargateSecurityGroup],
-        publicLoadBalancer: true,
-        taskSubnets: {
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        defaultRootObject: "index.html",
+        defaultBehavior: {
+          origin: new origins.S3Origin(bucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },
-        taskImageOptions: {
-          image: ecs.ContainerImage.fromRegistry(
-            "public.ecr.aws/r6d6a6d7/requestbin-app:latest"
-          ), // test image
-          environment: {
-            DB_HOST: dbInstance.dbInstanceEndpointAddress,
-            DB_PORT: "5432",
-            DB_NAME: "requestbin",
-            DB_USER: "postgres",
-            NODE_ENV: "production",
+        additionalBehaviors: {
+          "api/*": {
+            origin: new origins.LoadBalancerV2Origin(
+              fargateService.loadBalancer,
+              {
+                protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+              }
+            ),
+            viewerProtocolPolicy:
+              cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+            allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+            originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
           },
-          secrets: {
-            DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, "password"),
-          },
-          containerPort: 3001,
         },
-        minHealthyPercent: 100,
       }
     );
+    new CfnOutput(stack, "DBEndpoint", {
+      value: dbInstance.dbInstanceEndpointAddress,
+    });
+
+    new CfnOutput(stack, "CloudFrontUrl", {
+      value: `https://${distribution.domainName}`,
+    });
+
+    new CfnOutput(stack, "AlbUrl", {
+      value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
+    });
 
     return app.synth();
   });
