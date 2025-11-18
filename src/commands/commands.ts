@@ -13,6 +13,7 @@ import type {
   ConfigFront,
   Config,
   StackType,
+  ConfigFrontBack,
 } from "../types/index.js";
 // import enquirer from "enquirer";
 import { input, select } from "@inquirer/prompts";
@@ -72,11 +73,27 @@ export const loadCommands = (program: Command) => {
           break;
         }
         case "front+back": {
-          // future implementation
+          const directory = await input({
+            message: "What is the relative path to the asset directory?",
+            required: true,
+          });
+          const dockerfileDirectory = await input({
+            message: "What is the relative path to the Dockerfile?",
+            required: true,
+          });
+          const frontBackConfig: ConfigFrontBack = {
+            ...configBase,
+            assetDirectory: directory,
+            dockerfileDirectory,
+          };
+          config = frontBackConfig;
+
           console.error(
             chalk.red("front+back stack type is not yet implemented.")
           );
           process.exit(1);
+
+          break;
         }
         default: {
           const unhandledType: never = stackType;
