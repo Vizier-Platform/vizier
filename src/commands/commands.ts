@@ -5,7 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
-import { deployS3Stack } from "../lib/aws/cdk-s3.js";
+import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
 import { writeProperties } from "../lib/outputs.js";
 import type { Config } from "../types/index.js";
@@ -40,7 +40,7 @@ export const loadCommands = (program: Command) => {
     .command("deploy")
     .description("Deploy static site to CloudFormation Stack")
     .action(async () => {
-      await deployS3Stack();
+      await deployS3StackFromConfig();
       console.log(chalk.green(`Static site live.`));
     });
 
