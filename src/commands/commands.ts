@@ -7,13 +7,14 @@ import path from "node:path";
 import sh from "../lib/sh.js";
 import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
-import { writeProperties } from "../lib/outputs.js";
-import type {
-  ConfigBase,
-  ConfigFront,
-  Config,
-  StackType,
-  ConfigFrontBack,
+import { readProperties, writeProperties } from "../lib/outputs.js";
+import {
+  type ConfigBase,
+  type ConfigFront,
+  type Config,
+  type StackType,
+  type ConfigFrontBack,
+  configSchema,
 } from "../types/index.js";
 // import enquirer from "enquirer";
 import { input, select } from "@inquirer/prompts";
@@ -67,6 +68,7 @@ export const loadCommands = (program: Command) => {
           });
           const frontConfig: ConfigFront = {
             ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
             assetDirectory: directory,
           };
           config = frontConfig;
@@ -83,6 +85,7 @@ export const loadCommands = (program: Command) => {
           });
           const frontBackConfig: ConfigFrontBack = {
             ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
             assetDirectory: directory,
             dockerfileDirectory,
           };
@@ -111,8 +114,28 @@ export const loadCommands = (program: Command) => {
     .command("deploy")
     .description("Deploy static site to CloudFormation Stack")
     .action(async () => {
-      await deployS3StackFromConfig();
-      console.log(chalk.green(`Static site live.`));
+      const config: Config = configSchema.parse(readProperties("config.json"));
+      const { stackType } = config;
+
+      switch (stackType) {
+        case "front": {
+          await deployS3StackFromConfig();
+          console.log(chalk.green(`Static site deployed.`));
+          break;
+        }
+        case "front+back": {
+          console.error(
+            chalk.red("front+back stack type is not yet implemented.")
+          );
+          process.exit(1);
+          break;
+        }
+        default: {
+          const unhandledType: never = stackType;
+          console.error(chalk.red(`Unhandled stack type ${unhandledType}`));
+          process.exit(1);
+        }
+      }
     });
 
   program

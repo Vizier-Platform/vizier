@@ -12,11 +12,13 @@ export const configBaseSchema = z.object({
 export type ConfigBase = z.infer<typeof configBaseSchema>;
 
 export const configFrontSchema = configBaseSchema.extend({
+  stackType: z.literal("front"),
   assetDirectory: z.string(),
 });
 export type ConfigFront = z.infer<typeof configFrontSchema>;
 
 export const configFrontBackSchema = configFrontSchema.extend({
+  stackType: z.literal("front+back"),
   dockerfileDirectory: z.string(),
 });
 export type ConfigFrontBack = z.infer<typeof configFrontBackSchema>;
