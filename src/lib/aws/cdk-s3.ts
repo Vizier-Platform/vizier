@@ -9,10 +9,12 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import path from "node:path";
 import S3ClientService from "./s3.js";
-import { readStoredOutputs, writeStoredOutputs } from "../outputs.js";
-
-const STACK_NAME = "VizierStack2";
-const ASSET_DIRECTORY = path.join(process.cwd(), "test-site");
+import { readProperties, writeProperties } from "../outputs.js";
+import {
+  type Outputs,
+  configSchema,
+  outputsSchema,
+} from "../../types/index.js";
 
 async function getBucketNameFromStack(
   stackName: string
@@ -30,26 +32,42 @@ async function getBucketNameFromStack(
   return bucketOutput?.OutputValue;
 }
 
-async function syncAssetsToBucket(bucketName: string): Promise<void> {
-  const s3Service = new S3ClientService();
-  await s3Service.syncDirectory(bucketName, ASSET_DIRECTORY);
+export async function deployS3StackFromConfig() {
+  const { projectId, assetDirectory } = configSchema.parse(
+    readProperties("config.json")
+  );
+  const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
+  const existingOutputs = readProperties("outputs.json");
+  const parsedOutputs = outputsSchema.safeParse(existingOutputs);
+
+  if (parsedOutputs.success) {
+    const s3Service = new S3ClientService();
+
+    await s3Service.syncDirectory(
+      parsedOutputs.data.bucketName,
+      absoluteAssetDirectory
+    );
+  } else {
+    const returnedOutputs = await deployS3Stack(
+      projectId,
+      absoluteAssetDirectory
+    );
+
+    writeProperties("outputs.json", returnedOutputs);
+  }
 }
 
-export async function deployS3Stack(baseName: string): Promise<void> {
-  const storedOutputs = readStoredOutputs();
-
-  if (storedOutputs?.bucketName) {
-    await syncAssetsToBucket(storedOutputs.bucketName);
-    return;
-  }
-
+export async function deployS3Stack(
+  stackName: string,
+  assetDirectory: string
+): Promise<Outputs> {
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
-    const stack = new Stack(app, STACK_NAME);
+    const stack = new Stack(app, stackName);
 
-    const bucket = new s3.Bucket(stack, baseName, {
+    const bucket = new s3.Bucket(stack, "static-site", {
       versioned: true,
       websiteIndexDocument: "index.html",
       publicReadAccess: true,
@@ -60,7 +78,7 @@ export async function deployS3Stack(baseName: string): Promise<void> {
 
     new s3deploy.BucketDeployment(stack, "DeployFiles", {
       // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset(ASSET_DIRECTORY)], // path to your build
+      sources: [s3deploy.Source.asset(assetDirectory)], // path to your build
       destinationBucket: bucket,
     });
 
@@ -73,11 +91,11 @@ export async function deployS3Stack(baseName: string): Promise<void> {
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getBucketNameFromStack(STACK_NAME);
+  const bucketName = await getBucketNameFromStack(stackName);
 
   if (!bucketName) {
     throw new Error("Unable to determine deployed bucket name");
   }
 
-  writeStoredOutputs({ bucketName });
+  return { bucketName };
 }

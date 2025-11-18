@@ -5,8 +5,10 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import sh from "../lib/sh.js";
-import { deployS3Stack } from "../lib/aws/cdk-s3.js";
-import { destroyStack } from "../lib/aws/destroyStack.js";
+import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
+import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
+import { writeProperties } from "../lib/outputs.js";
+import type { Config } from "../types/index.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));
@@ -16,21 +18,38 @@ async function checkoutRepo(repo: string, ref: string) {
 
 export const loadCommands = (program: Command) => {
   program
+    .command("init")
+    .description("Initialize Vizier in your project root")
+    .requiredOption("-n, --name <project name>")
+    .requiredOption("-d, --directory <relative path to asset directory>")
+    .action(async (options) => {
+      const { name, directory } = options;
+      const config: Config = {
+        projectName: name,
+        projectId: `${name}-${Date.now()}`,
+        assetDirectory: directory,
+      };
+
+      writeProperties("config.json", config);
+
+      console.log("Project initialized successfully.");
+      console.log("Run vizier deploy to deploy your application.");
+    });
+
+  program
     .command("deploy")
     .description("Deploy static site to CloudFormation Stack")
-    .argument("<basename>", "Base name for bucket")
-    .action(async (basename) => {
-      await deployS3Stack(basename);
+    .action(async () => {
+      await deployS3StackFromConfig();
       console.log(chalk.green(`Static site live.`));
     });
 
   program
     .command("destroyStack")
     .description("Destroy stack and associated resources.")
-    .argument("<stackname>", "Stack name to be destroyed")
-    .action(async (stackname) => {
-      await destroyStack(stackname);
-      console.log(chalk.yellow(`${stackname} destroyed`));
+    .action(async () => {
+      await destroyStackFromConfig();
+      console.log(chalk.yellow("Stack destroyed."));
     });
 
   program
