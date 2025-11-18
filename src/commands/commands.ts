@@ -11,7 +11,7 @@ import { writeProperties } from "../lib/outputs.js";
 import type {
   ConfigBase,
   ConfigFront,
-  FullConfig,
+  Config,
   StackType,
 } from "../types/index.js";
 // import enquirer from "enquirer";
@@ -42,6 +42,11 @@ export const loadCommands = (program: Command) => {
             value: "front",
             description: "A static site",
           },
+          {
+            name: "frontend + backend",
+            value: "front+back",
+            description: "A static site with backend (coming soon)",
+          },
         ],
       });
 
@@ -51,7 +56,7 @@ export const loadCommands = (program: Command) => {
         stackType,
       };
 
-      let config: FullConfig;
+      let config: Config;
 
       switch (stackType) {
         case "front": {
@@ -65,6 +70,13 @@ export const loadCommands = (program: Command) => {
           };
           config = frontConfig;
           break;
+        }
+        case "front+back": {
+          // future implementation
+          console.error(
+            chalk.red("front+back stack type is not yet implemented.")
+          );
+          process.exit(1);
         }
         default: {
           const unhandledType: never = stackType;
