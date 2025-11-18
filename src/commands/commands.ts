@@ -16,7 +16,6 @@ import {
   type ConfigFrontBack,
   configSchema,
 } from "../types/index.js";
-// import enquirer from "enquirer";
 import { input, select } from "@inquirer/prompts";
 
 async function checkoutRepo(repo: string, ref: string) {
