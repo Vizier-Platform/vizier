@@ -1,31 +1,60 @@
-# vizier
+# Vizier
 
----DEPLOYING STATIC SITE ON S3 CONTAINER---
+Vizier is a CLI tool for deploying web applications to a user's own AWS account.
 
-Set up AWS CLI with your AWS account  
-Navigate to vizier folder
+## Installation
 
-npm install  
-//OPTIONAL: exit and re-enter folder
+### Prerequisites
 
-npm link  
-tsc
+- install AWS CLI and configure AWS credentials
+- install AWS CDK CLI and run `cdk bootstrap aws://<aws-id-number>/<aws-region>`
 
-vizier create my-bucket  
-`my-bucket-213451254 was created`
+### Installing Vizier
 
-vizier sync -b my-bucket-213451254 -d  
-path-to-local-directory
+In the future: NPM install globally.
 
-vizier destroy my-bucket-213451254
+Currently:
 
----DEPLOYING STATIC SITE WITH CDK---  
-Hard code local directory of code to be deployed, with `/vizier/` as the root
+- clone vizier repository
+- navigate to vizier directory
+- `npm install`
+- `npm run build`
+- `npm link`
+- OPTIONAL: exit and re-enter folder (?)
 
-RUN:  
-npm install  
-cdk bootstrap aws://my-aws-id-numbers us-east-1
+## Use
 
-vizier deploy my-stack-name
+`vizier help` for command descriptions
 
-vizier destroyStack my-stack-name
+### Deploying Static Site
+
+All commands must be run in the project root.
+
+Setup:
+
+- `vizier init -n <project-name> -d <asset-directory>`  
+  e.g. `vizier init -n MyProject -d dist`
+- `vizier deploy`
+
+Syncing:
+
+- `vizier deploy`
+
+Teardown:
+
+- `vizier destroyStack`
+- `rm -rf .vizier`
+
+### Deploying Static Site (Deprecated Way)
+
+Setup:
+
+- `vizier create my-bucket`
+
+Syncing:
+
+- `vizier sync -b my-bucket-213451254 -d path-to-local-directory`
+
+Teardown:
+
+- `vizier destroy my-bucket-213451254`
