@@ -12,16 +12,29 @@ export function defineCluster(stack: Stack, vpc: ec2.Vpc) {
   });
 }
 
+export function defineFargateSecurityGroup(stack: Stack, vpc: ec2.Vpc) {
+  return new ec2.SecurityGroup(stack, "FargateSecurityGroup", {
+    vpc: vpc as ec2.IVpc,
+    description: "Fargate tasks security group",
+    allowAllOutbound: true,
+  });
+}
+
 export function defineFargateService(
   stack: Stack,
   cluster: ecs.Cluster,
   fargateSecurityGroup: ec2.SecurityGroup,
+  isImageLocal: boolean,
   imagePath: string,
   dbInstance: DatabaseInstance,
   dbName: string,
   dbSecret: ISecret,
   containerPort: number
 ) {
+  const image = isImageLocal
+    ? ecs.ContainerImage.fromAsset(imagePath)
+    : ecs.ContainerImage.fromRegistry(imagePath);
+
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
     stack,
     "VizierFargateService",
@@ -36,7 +49,7 @@ export function defineFargateService(
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       taskImageOptions: {
-        image: ecs.ContainerImage.fromRegistry(imagePath), // test image
+        image,
         environment: {
           DB_HOST: dbInstance.dbInstanceEndpointAddress,
           DB_PORT: "5432",

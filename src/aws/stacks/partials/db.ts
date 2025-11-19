@@ -2,22 +2,17 @@ import { Stack, RemovalPolicy } from "aws-cdk-lib";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
-export function defineDb(stack: Stack, vpc: ec2.Vpc, dbName: string) {
+export function defineDb(
+  stack: Stack,
+  vpc: ec2.Vpc,
+  dbName: string,
+  fargateSecurityGroup: ec2.SecurityGroup
+) {
   const dbSecurityGroup = new ec2.SecurityGroup(stack, "DbSecurityGroup", {
     vpc: vpc as ec2.IVpc,
     description: "Allow Postgres from Fargate tasks",
     allowAllOutbound: true,
   });
-
-  const fargateSecurityGroup = new ec2.SecurityGroup(
-    stack,
-    "FargateSecurityGroup",
-    {
-      vpc: vpc as ec2.IVpc,
-      description: "Fargate tasks security group",
-      allowAllOutbound: true,
-    }
-  );
 
   dbSecurityGroup.addIngressRule(
     fargateSecurityGroup,

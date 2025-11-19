@@ -2,12 +2,17 @@ import { App, Stack, CfnOutput } from "aws-cdk-lib";
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { defineBucket } from "./partials/bucket.js";
 import { defineVpc } from "./partials/vpc.js";
-import { defineCluster, defineFargateService } from "./partials/fargate.js";
+import {
+  defineCluster,
+  defineFargateSecurityGroup,
+  defineFargateService,
+} from "./partials/fargate.js";
 import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 
 export async function deployFSApp(
   assetDirectory: string,
+  isImageLocal: boolean,
   imagePath: string,
   dbName: string,
   containerPort: number
@@ -22,16 +27,20 @@ export async function deployFSApp(
 
     const cluster = defineCluster(stack, vpc);
 
-    const { fargateSecurityGroup, dbInstance, dbSecret } = defineDb(
+    const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
+
+    const { dbInstance, dbSecret } = defineDb(
       stack,
       vpc,
-      dbName
+      dbName,
+      fargateSecurityGroup
     );
 
     const fargateService = defineFargateService(
       stack,
       cluster,
       fargateSecurityGroup,
+      isImageLocal,
       imagePath,
       dbInstance,
       dbName,
