@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import S3ClientService from "../lib/aws/s3.js";
 
-function load(program: Command, commandName: string) {
+export function loadCreateBucketCommand(program: Command, commandName: string) {
   program
     .command(commandName)
     .description("Creates an empty S3 Bucket for static hosting")
@@ -13,5 +13,3 @@ function load(program: Command, commandName: string) {
       await client.enableStaticHosting(bucketName);
     });
 }
-
-export default { load };

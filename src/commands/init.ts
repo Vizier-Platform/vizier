@@ -10,7 +10,7 @@ import type {
   ConfigFrontBack,
 } from "../types/index.js";
 
-function load(program: Command, commandName: string) {
+export function loadInitCommand(program: Command, commandName: string) {
   program
     .command(commandName)
     .description("Initialize Vizier in your project root")
@@ -95,5 +95,3 @@ function load(program: Command, commandName: string) {
       console.log("Run vizier deploy to deploy your application.");
     });
 }
-
-export default { load };

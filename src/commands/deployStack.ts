@@ -4,7 +4,7 @@ import { deployS3StackFromConfig } from "../lib/aws/cdk-s3.js";
 import { readProperties } from "../lib/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
 
-function load(program: Command, commandName: string) {
+export function loadDeployCommand(program: Command, commandName: string) {
   program
     .command(commandName)
     .description("Deploy static site to CloudFormation Stack")
@@ -33,5 +33,3 @@ function load(program: Command, commandName: string) {
       }
     });
 }
-
-export default { load };

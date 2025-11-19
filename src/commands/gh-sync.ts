@@ -12,7 +12,7 @@ async function checkoutRepo(repo: string, ref: string) {
   return tmp;
 }
 
-function load(program: Command, commandName: string) {
+export function loadGhSyncCommand(program: Command, commandName: string) {
   program
     .command(commandName)
     .description("Uploads github files to S3 Bucket")
@@ -40,5 +40,3 @@ function load(program: Command, commandName: string) {
       }
     });
 }
-
-export default { load };

@@ -1,13 +1,13 @@
 import { Command } from "commander";
 
-import init from "./init.js";
-import deployStack from "./deployStack.js";
-import destroyStack from "./destroyStack.js";
-// import createBucket from "./createBucket.js";
-// import syncBucket from "./syncBucket.js";
-// import ghSync from "./gh-sync.js";
-// import emptyBucket from "./emptyBucket.js";
-// import destroyBucket from "./destroyBucket.js";
+import { loadInitCommand } from "./init.js";
+import { loadDeployCommand } from "./deployStack.js";
+import { loadDestroyCommand } from "./destroyStack.js";
+// import { loadCreateBucketCommand } from "./createBucket.js";
+// import { loadSyncBucketCommand } from "./syncBucket.js";
+// import { loadGhSyncCommand } from "./gh-sync.js";
+// import { loadEmptyBucketCommand } from "./emptyBucket.js";
+// import { loadDestroyBucketCommand } from "./destroyBucket.js";
 
 export const loadCommands = (program: Command) => {
   // command names specified here so that they are
@@ -15,14 +15,14 @@ export const loadCommands = (program: Command) => {
   // - decoupled from behavior definitions
   // "help" is provided by commander
 
-  init.load(program, "init");
-  deployStack.load(program, "deploy");
-  destroyStack.load(program, "destroy");
+  loadInitCommand(program, "init");
+  loadDeployCommand(program, "deploy");
+  loadDestroyCommand(program, "destroy");
 
   // deprecated bucket commands
-  // createBucket.load(program, "createBucket");
-  // syncBucket.load(program, "syncBucket");
-  // ghSync.load(program, "gh-syncBucket");
-  // emptyBucket.load(program, "emptyBucket");
-  // destroyBucket.load(program, "destroyBucket");
+  // loadCreateBucketCommand(program, "createBucket");
+  // loadSyncBucketCommand(program, "syncBucket");
+  // loadGhSyncCommand(program, "gh-syncBucket");
+  // loadEmptyBucketCommand(program, "emptyBucket");
+  // loadDestroyBucketCommand(program, "destroyBucket");
 };

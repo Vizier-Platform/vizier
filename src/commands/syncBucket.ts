@@ -2,7 +2,7 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import S3ClientService from "../lib/aws/s3.js";
 
-function load(program: Command, commandName: string) {
+export function loadSyncBucketCommand(program: Command, commandName: string) {
   program
     .command(commandName)
     .description("Uploads local files to S3 Bucket")
@@ -22,5 +22,3 @@ function load(program: Command, commandName: string) {
       console.log(chalk.green(`${bucketName} synced with ${localDirectory}`));
     });
 }
-
-export default { load };
