@@ -190,5 +190,3 @@ export async function deployFSApp(
 
   await toolkit.deploy(cloudAssemblySource);
 }
-
-deployFSApp();
