@@ -30,8 +30,8 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Build static assets
-        run: npm run build
+      - name: Build static assets (if defined)
+        run: npm run build --if-present
 
       - name: Read asset directory from Vizier config
         run: |
