@@ -2,7 +2,7 @@ import { Stack, RemovalPolicy } from "aws-cdk-lib";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
-export function defineDb(stack: Stack, vpc: ec2.Vpc, db_name: string) {
+export function defineDb(stack: Stack, vpc: ec2.Vpc, dbName: string) {
   const dbSecurityGroup = new ec2.SecurityGroup(stack, "DbSecurityGroup", {
     vpc: vpc as ec2.IVpc,
     description: "Allow Postgres from Fargate tasks",
@@ -42,7 +42,7 @@ export function defineDb(stack: Stack, vpc: ec2.Vpc, db_name: string) {
     securityGroups: [dbSecurityGroup],
     deleteAutomatedBackups: true,
     removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
-    databaseName: db_name,
+    databaseName: dbName,
     credentials: rds.Credentials.fromGeneratedSecret("postgres"),
   });
 

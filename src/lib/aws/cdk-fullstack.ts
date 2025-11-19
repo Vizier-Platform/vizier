@@ -6,13 +6,10 @@ import { defineCluster, defineFargateService } from "./partials/fargate.js";
 import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 
-// Hard coded port for testing
-// const PORT = 80;
-
 export async function deployFSApp(
-  site_dr: string,
-  image_url: string,
-  db_name: string,
+  assetDirectory: string,
+  imagePath: string,
+  dbName: string,
   containerPort: number
 ): Promise<void> {
   const toolkit = new Toolkit();
@@ -20,7 +17,7 @@ export async function deployFSApp(
     const app = new App();
     const stack = new Stack(app, "fullstack-deployment");
 
-    const bucket = defineBucket(stack, site_dr);
+    const bucket = defineBucket(stack, assetDirectory);
     const vpc = defineVpc(stack);
 
     const cluster = defineCluster(stack, vpc);
@@ -28,16 +25,16 @@ export async function deployFSApp(
     const { fargateSecurityGroup, dbInstance, dbSecret } = defineDb(
       stack,
       vpc,
-      db_name
+      dbName
     );
 
     const fargateService = defineFargateService(
       stack,
       cluster,
       fargateSecurityGroup,
-      image_url,
+      imagePath,
       dbInstance,
-      db_name,
+      dbName,
       dbSecret,
       containerPort
     );

@@ -16,9 +16,9 @@ export function defineFargateService(
   stack: Stack,
   cluster: ecs.Cluster,
   fargateSecurityGroup: ec2.SecurityGroup,
-  image_url: string,
+  imagePath: string,
   dbInstance: DatabaseInstance,
-  db_name: string,
+  dbName: string,
   dbSecret: ISecret,
   containerPort: number
 ) {
@@ -36,11 +36,11 @@ export function defineFargateService(
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       taskImageOptions: {
-        image: ecs.ContainerImage.fromRegistry(image_url), // test image
+        image: ecs.ContainerImage.fromRegistry(imagePath), // test image
         environment: {
           DB_HOST: dbInstance.dbInstanceEndpointAddress,
           DB_PORT: "5432",
-          DB_NAME: db_name,
+          DB_NAME: dbName,
           DB_USER: "postgres",
           NODE_ENV: "production",
         },
