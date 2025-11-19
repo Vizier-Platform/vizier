@@ -13,6 +13,7 @@ import {
   outputsSchema,
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
+import { defineDistribution } from "./partials/cloudfront.js";
 
 async function getBucketNameFromStack(
   stackName: string
@@ -67,8 +68,14 @@ export async function deployS3Stack(
 
     const bucket = defineBucket(stack, assetDirectory);
 
+    const distribution = defineDistribution(stack, bucket);
+
     new CfnOutput(stack, "BucketName", {
       value: bucket.bucketName,
+    });
+
+    new CfnOutput(stack, "CloudFrontUrl", {
+      value: `https://${distribution.domainName}`,
     });
 
     return app.synth();
