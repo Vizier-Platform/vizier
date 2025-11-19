@@ -40,6 +40,10 @@
     "mime": "^4.1.0",
     "zod": "^4.1.12"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "bin": {
     "vizier": "./dist/index.js"
   }
