@@ -1,4 +1,4 @@
-import { App, RemovalPolicy, Stack, CfnOutput } from "aws-cdk-lib";
+import { App, RemovalPolicy, Stack, CfnOutput, Duration } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
@@ -156,6 +156,20 @@ export async function deployFSApp(): Promise<void> {
             originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
           },
         },
+        errorResponses: [
+          {
+            httpStatus: 403,
+            responseHttpStatus: 200,
+            responsePagePath: "/index.html",
+            ttl: Duration.seconds(0),
+          },
+          {
+            httpStatus: 404,
+            responseHttpStatus: 200,
+            responsePagePath: "/index.html",
+            ttl: Duration.seconds(0),
+          },
+        ],
       }
     );
     new CfnOutput(stack, "DBEndpoint", {
