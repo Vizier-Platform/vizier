@@ -34,8 +34,11 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
 
+      - name: Build Vizier CLI
+        run: npm run build
+
       - name: Install Vizier CLI
-        run: npm install -g vizier
+        run: npm install -g .
 
       - name: Deploy with vizier
         run: vizier deploy
