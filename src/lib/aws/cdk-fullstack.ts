@@ -12,6 +12,8 @@ import { Toolkit } from "@aws-cdk/toolkit-lib";
 // Hard coded port for testing
 // const PORT = 80;
 const SITE_DIR = "../../../../requestbin/frontend/dist";
+const IMAGE_URL = "public.ecr.aws/r6d6a6d7/requestbin-app:latest";
+const DB_NAME = "requestbin";
 
 export async function deployFSApp(): Promise<void> {
   const toolkit = new Toolkit();
@@ -82,7 +84,7 @@ export async function deployFSApp(): Promise<void> {
       securityGroups: [dbSecurityGroup],
       deleteAutomatedBackups: true,
       removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
-      databaseName: "requestbin",
+      databaseName: DB_NAME,
       credentials: rds.Credentials.fromGeneratedSecret("postgres"),
     });
 
@@ -106,13 +108,11 @@ export async function deployFSApp(): Promise<void> {
             subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
           },
           taskImageOptions: {
-            image: ecs.ContainerImage.fromRegistry(
-              "public.ecr.aws/r6d6a6d7/requestbin-app:latest"
-            ), // test image
+            image: ecs.ContainerImage.fromRegistry(IMAGE_URL), // test image
             environment: {
               DB_HOST: dbInstance.dbInstanceEndpointAddress,
               DB_PORT: "5432",
-              DB_NAME: "requestbin",
+              DB_NAME: DB_NAME,
               DB_USER: "postgres",
               NODE_ENV: "production",
             },
