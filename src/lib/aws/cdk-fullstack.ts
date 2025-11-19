@@ -67,11 +67,11 @@ export async function deployFSApp(): Promise<void> {
 
     const dbInstance = new rds.DatabaseInstance(stack, "DatabaseInstance", {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_17_6,
+        version: rds.PostgresEngineVersion.VER_17_6, // perhaps allow user to choose psql ver?
       }),
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE3,
-        ec2.InstanceSize.SMALL
+        ec2.InstanceClass.BURSTABLE3, // consider altering instanceClass to server wider range of apps
+        ec2.InstanceSize.SMALL // as above
       ),
       vpc: vpc as ec2.IVpc,
       vpcSubnets: {
@@ -81,7 +81,7 @@ export async function deployFSApp(): Promise<void> {
       maxAllocatedStorage: 100,
       securityGroups: [dbSecurityGroup],
       deleteAutomatedBackups: true,
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
       databaseName: "requestbin",
       credentials: rds.Credentials.fromGeneratedSecret("postgres"),
     });
