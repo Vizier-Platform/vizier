@@ -1,8 +1,5 @@
-// Import required packages
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, RemovalPolicy, Stack } from "aws-cdk-lib";
-import * as s3 from "aws-cdk-lib/aws-s3";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import {
   CloudFormationClient,
   DescribeStacksCommand,
@@ -15,6 +12,7 @@ import {
   configFrontSchema,
   outputsSchema,
 } from "../../types/index.js";
+import { defineBucket } from "./partials/bucket.js";
 
 async function getBucketNameFromStack(
   stackName: string
@@ -67,20 +65,7 @@ export async function deployS3Stack(
     const app = new App();
     const stack = new Stack(app, stackName);
 
-    const bucket = new s3.Bucket(stack, "static-site", {
-      versioned: true,
-      websiteIndexDocument: "index.html",
-      publicReadAccess: true,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS_ONLY,
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
-
-    new s3deploy.BucketDeployment(stack, "DeployFiles", {
-      // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset(assetDirectory)], // path to your build
-      destinationBucket: bucket,
-    });
+    const bucket = defineBucket(stack, assetDirectory);
 
     new CfnOutput(stack, "BucketName", {
       value: bucket.bucketName,
