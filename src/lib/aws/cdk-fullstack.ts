@@ -11,11 +11,12 @@ import { Toolkit } from "@aws-cdk/toolkit-lib";
 
 // Hard coded port for testing
 // const PORT = 80;
-const SITE_DIR = "../../../../requestbin/frontend/dist";
-const IMAGE_URL = "public.ecr.aws/r6d6a6d7/requestbin-app:latest";
-const DB_NAME = "requestbin";
 
-export async function deployFSApp(): Promise<void> {
+export async function deployFSApp(
+  site_dr: string,
+  image_url: string,
+  db_name: string
+): Promise<void> {
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
@@ -32,7 +33,7 @@ export async function deployFSApp(): Promise<void> {
 
     new s3deploy.BucketDeployment(stack, "DeployFiles", {
       // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset(SITE_DIR)], // path to your build
+      sources: [s3deploy.Source.asset(site_dr)], // path to your build
       destinationBucket: bucket,
     });
     const vpc = new ec2.Vpc(stack, "MyVpc", {
@@ -84,7 +85,7 @@ export async function deployFSApp(): Promise<void> {
       securityGroups: [dbSecurityGroup],
       deleteAutomatedBackups: true,
       removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
-      databaseName: DB_NAME,
+      databaseName: db_name,
       credentials: rds.Credentials.fromGeneratedSecret("postgres"),
     });
 
@@ -108,11 +109,11 @@ export async function deployFSApp(): Promise<void> {
             subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
           },
           taskImageOptions: {
-            image: ecs.ContainerImage.fromRegistry(IMAGE_URL), // test image
+            image: ecs.ContainerImage.fromRegistry(image_url), // test image
             environment: {
               DB_HOST: dbInstance.dbInstanceEndpointAddress,
               DB_PORT: "5432",
-              DB_NAME: DB_NAME,
+              DB_NAME: db_name,
               DB_USER: "postgres",
               NODE_ENV: "production",
             },
