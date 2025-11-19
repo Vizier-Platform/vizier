@@ -3,7 +3,7 @@ import { App, Stack } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
-import requireDocker from "../requireDocker.js";
+import requireDocker from "../../utils/requireDocker.js";
 
 interface AppServerOptions {
   isImageLocal: boolean;

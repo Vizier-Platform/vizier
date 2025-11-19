@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { Command } from "commander";
-import S3ClientService from "../lib/aws/s3.js";
+import S3ClientService from "../aws/s3.js";
 
 export function loadEmptyBucketCommand(program: Command, commandName: string) {
   program

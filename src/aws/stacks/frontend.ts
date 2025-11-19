@@ -5,8 +5,8 @@ import {
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
 import path from "node:path";
-import S3ClientService from "./s3.js";
-import { readProperties, writeProperties } from "../outputs.js";
+import S3ClientService from "../s3.js";
+import { readProperties, writeProperties } from "../../utils/outputs.js";
 import {
   type Outputs,
   configFrontSchema,
