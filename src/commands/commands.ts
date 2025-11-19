@@ -20,9 +20,9 @@ export const loadCommands = (program: Command) => {
   destroyStack.load(program, "destroy");
 
   // deprecated bucket commands
-  // createBucket.load(program, "create");
-  // syncBucket.load(program, "sync");
-  // ghSync.load(program, "gh-sync");
-  // emptyBucket.load(program, "empty");
-  // destroyBucket.load(program, "destroy");
+  // createBucket.load(program, "createBucket");
+  // syncBucket.load(program, "syncBucket");
+  // ghSync.load(program, "gh-syncBucket");
+  // emptyBucket.load(program, "emptyBucket");
+  // destroyBucket.load(program, "destroyBucket");
 };
