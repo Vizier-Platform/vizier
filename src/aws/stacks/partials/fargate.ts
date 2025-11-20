@@ -48,9 +48,8 @@ export function defineFargateService(
         DB_HOST: dbConfig.dbInstance.dbInstanceEndpointAddress,
         DB_PORT: "5432",
         DB_NAME: dbConfig.dbName,
-        NODE_ENV: "production",
       }
-    : { NODE_ENV: "production" };
+    : {};
 
   const secrets = dbConfig
     ? {
