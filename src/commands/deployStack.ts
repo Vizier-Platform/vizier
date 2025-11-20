@@ -3,6 +3,7 @@ import type { Command } from "commander";
 import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
 import { readProperties } from "../utils/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
+import { deployFrontendWithServerFromConfig } from "../aws/stacks/frontendWithServer.js";
 
 export function loadDeployCommand(program: Command, commandName: string) {
   program
@@ -19,10 +20,8 @@ export function loadDeployCommand(program: Command, commandName: string) {
           break;
         }
         case "front+back": {
-          console.error(
-            chalk.red("front+back stack type is not yet implemented.")
-          );
-          process.exit(1);
+          await deployFrontendWithServerFromConfig(config);
+          console.log(chalk.green(`Frontend and backend deployed.`));
           break;
         }
         default: {

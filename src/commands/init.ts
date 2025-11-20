@@ -27,12 +27,13 @@ export function loadInitCommand(program: Command, commandName: string) {
           {
             name: "static site",
             value: "front",
-            description: "A static site",
+            description: "A static site (S3, Cloudfront)",
           },
           {
             name: "frontend + backend",
             value: "front+back",
-            description: "A static site with backend (coming soon)",
+            description:
+              "Separately hosted frontend and backend (S3, Cloudfront, ECS)",
           },
         ],
       });
@@ -75,12 +76,6 @@ export function loadInitCommand(program: Command, commandName: string) {
             dockerfileDirectory,
           };
           config = frontBackConfig;
-
-          console.error(
-            chalk.red("front+back stack type is not yet implemented.")
-          );
-          process.exit(1);
-
           break;
         }
         default: {
