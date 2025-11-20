@@ -9,6 +9,8 @@ import type {
   ConfigFront,
   ConfigFrontBack,
   ConfigBack,
+  ConfigBackDb,
+  ConfigFrontBackDb,
 } from "../types/index.js";
 
 export function loadInitCommand(program: Command, commandName: string) {
@@ -40,6 +42,17 @@ export function loadInitCommand(program: Command, commandName: string) {
             name: "server only",
             value: "back",
             description: "All in one server (ECS)",
+          },
+          {
+            name: "server with database",
+            value: "back+db",
+            description: "A server with a database (ECS, RDS)",
+          },
+          {
+            name: "static frontend + server with database",
+            value: "front+back+db",
+            description:
+              "Separately hosted frontend and backend with database (S3, Cloudfront, ECS, RDS)",
           },
         ],
       });
@@ -83,6 +96,28 @@ export function loadInitCommand(program: Command, commandName: string) {
             dockerfileDirectory,
           };
           config = backConfig;
+          break;
+        }
+        case "back+db": {
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const backDbConfig: ConfigBackDb = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            dockerfileDirectory,
+          };
+          config = backDbConfig;
+          break;
+        }
+        case "front+back+db": {
+          const assetDirectory = await promptAssetDirectory();
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const frontBackDbConfig: ConfigFrontBackDb = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            assetDirectory,
+            dockerfileDirectory,
+          };
+          config = frontBackDbConfig;
           break;
         }
         default: {
