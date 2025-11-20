@@ -14,7 +14,7 @@ export function loadDeployCommand(program: Command, commandName: string) {
 
       switch (stackType) {
         case "front": {
-          await deployFrontendFromConfig();
+          await deployFrontendFromConfig(config);
           console.log(chalk.green(`Static site deployed.`));
           break;
         }

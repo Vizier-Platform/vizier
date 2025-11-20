@@ -8,8 +8,8 @@ import path from "node:path";
 import S3ClientService from "../s3.js";
 import { readProperties, writeProperties } from "../../utils/outputs.js";
 import {
+  type ConfigFront,
   type Outputs,
-  configFrontSchema,
   outputsSchema,
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
@@ -31,10 +31,10 @@ async function getBucketNameFromStack(
   return bucketOutput?.OutputValue;
 }
 
-export async function deployFrontendFromConfig() {
-  const { projectId, assetDirectory } = configFrontSchema.parse(
-    readProperties("config.json")
-  );
+export async function deployFrontendFromConfig({
+  projectId,
+  assetDirectory,
+}: ConfigFront) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
   const existingOutputs = readProperties("outputs.json");
   const parsedOutputs = outputsSchema.safeParse(existingOutputs);
