@@ -50,9 +50,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/ $PROJECT_ID :${{ github.sha }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/$PROJECT_ID:${{ github.sha }}
 
       - name: Capture image URL
         id: push-image
         run: |
-          echo "image_url=${{ steps.login-ecr.outputs.registry }}/ $PROJECT_ID :${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "image_url=${{ steps.login-ecr.outputs.registry }}/$PROJECT_ID:${{ github.sha }}" >> "$GITHUB_OUTPUT"
