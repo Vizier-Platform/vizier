@@ -2,15 +2,17 @@ import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import type { Command } from "commander";
 import { writeProperties } from "../utils/outputs.js";
-import type {
-  StackType,
-  ConfigBase,
-  Config,
-  ConfigFront,
-  ConfigFrontBack,
-  ConfigBack,
-  ConfigBackDb,
-  ConfigFrontBackDb,
+import {
+  type StackType,
+  type ConfigBase,
+  type Config,
+  type ConfigFront,
+  type ConfigFrontBack,
+  type ConfigBack,
+  type ConfigBackDb,
+  type ConfigFrontBackDb,
+  STACK_NAME_INVALID_CHARACTER_PATTERN,
+  stackNameSchema,
 } from "../types/index.js";
 
 export function loadInitCommand(program: Command, commandName: string) {
@@ -22,7 +24,12 @@ export function loadInitCommand(program: Command, commandName: string) {
         message: "What is the project name?",
         required: true,
       });
-      const projectId = `${projectName}-${Date.now()}`;
+
+      const characterFilteredProjectName = projectName
+        .trim()
+        .replace(STACK_NAME_INVALID_CHARACTER_PATTERN, "");
+      const projectId = `vzr-${characterFilteredProjectName}-${Date.now()}`;
+      stackNameSchema.parse(projectId);
 
       const stackType: StackType = await select<StackType>({
         message: "Select project type",
