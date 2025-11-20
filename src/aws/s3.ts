@@ -13,7 +13,7 @@ import {
 import path from "node:path";
 import chalk from "chalk";
 import mime from "mime";
-import { forFileInDirectory } from "../files.js";
+import { forFileInDirectory } from "../utils/files.js";
 
 export default class S3ClientService {
   client: S3Client;

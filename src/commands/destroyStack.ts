@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
-import { destroyStackFromConfig } from "../lib/aws/destroyStack.js";
+import { destroyStackFromConfig } from "../aws/destroyStack.js";
 
 export function loadDestroyCommand(program: Command, commandName: string) {
   program

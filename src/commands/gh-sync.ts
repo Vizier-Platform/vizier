@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { mkdtemp, rm } from "node:fs/promises";
-import S3ClientService from "../lib/aws/s3.js";
+import S3ClientService from "../aws/s3.js";
 import os from "node:os";
 import path from "node:path";
-import sh from "../lib/sh.js";
+import sh from "../utils/sh.js";
 
 async function checkoutRepo(repo: string, ref: string) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "gh-sync-"));

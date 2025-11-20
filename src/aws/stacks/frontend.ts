@@ -1,20 +1,19 @@
-// Import required packages
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, RemovalPolicy, Stack } from "aws-cdk-lib";
-import * as s3 from "aws-cdk-lib/aws-s3";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import {
   CloudFormationClient,
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
 import path from "node:path";
-import S3ClientService from "./s3.js";
-import { readProperties, writeProperties } from "../outputs.js";
+import S3ClientService from "../s3.js";
+import { readProperties, writeProperties } from "../../utils/outputs.js";
 import {
   type Outputs,
   configFrontSchema,
   outputsSchema,
 } from "../../types/index.js";
+import { defineBucket } from "./partials/bucket.js";
+import { defineDistribution } from "./partials/cloudfront.js";
 
 async function getBucketNameFromStack(
   stackName: string
@@ -32,7 +31,7 @@ async function getBucketNameFromStack(
   return bucketOutput?.OutputValue;
 }
 
-export async function deployS3StackFromConfig() {
+export async function deployFrontendFromConfig() {
   const { projectId, assetDirectory } = configFrontSchema.parse(
     readProperties("config.json")
   );
@@ -48,42 +47,40 @@ export async function deployS3StackFromConfig() {
       absoluteAssetDirectory
     );
   } else {
-    const returnedOutputs = await deployS3Stack(
-      projectId,
-      absoluteAssetDirectory
-    );
+    const returnedOutputs = await deployFrontend({
+      stackName: projectId,
+      assetDirectory: absoluteAssetDirectory,
+    });
 
     writeProperties("outputs.json", returnedOutputs);
   }
 }
 
-export async function deployS3Stack(
-  stackName: string,
-  assetDirectory: string
-): Promise<Outputs> {
+interface FrontendOptions {
+  stackName: string;
+  assetDirectory: string;
+}
+
+export async function deployFrontend({
+  stackName,
+  assetDirectory,
+}: FrontendOptions): Promise<Outputs> {
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
     const stack = new Stack(app, stackName);
 
-    const bucket = new s3.Bucket(stack, "static-site", {
-      versioned: true,
-      websiteIndexDocument: "index.html",
-      publicReadAccess: true,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS_ONLY,
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
+    const bucket = defineBucket(stack, assetDirectory);
 
-    new s3deploy.BucketDeployment(stack, "DeployFiles", {
-      // "DeployFiles" is a descriptor ID
-      sources: [s3deploy.Source.asset(assetDirectory)], // path to your build
-      destinationBucket: bucket,
-    });
+    const distribution = defineDistribution(stack, bucket);
 
     new CfnOutput(stack, "BucketName", {
       value: bucket.bucketName,
+    });
+
+    new CfnOutput(stack, "CloudFrontUrl", {
+      value: `https://${distribution.domainName}`,
     });
 
     return app.synth();
