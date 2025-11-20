@@ -7,25 +7,22 @@ import {
   defineFargateSecurityGroup,
   defineFargateService,
 } from "./partials/fargate.js";
-import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
 
-interface FullstackOptions {
+interface FrontendWithServerOptions {
   assetDirectory: string;
   isImageLocal: boolean;
   imagePath: string;
-  dbName: string;
   containerPort: number;
 }
 
-export async function deployFrontendWithServerWithDatabase({
+export async function deployFrontendWithServer({
   assetDirectory,
   isImageLocal,
   imagePath,
-  dbName,
   containerPort,
-}: FullstackOptions): Promise<void> {
+}: FrontendWithServerOptions): Promise<void> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -33,7 +30,7 @@ export async function deployFrontendWithServerWithDatabase({
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
-    const stack = new Stack(app, "fullstack-deployment");
+    const stack = new Stack(app, "frontend+server");
 
     const bucket = defineBucket(stack, assetDirectory);
     const vpc = defineVpc(stack);
@@ -41,13 +38,6 @@ export async function deployFrontendWithServerWithDatabase({
     const cluster = defineCluster(stack, vpc);
 
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
-
-    const { dbInstance, dbSecret } = defineDb(
-      stack,
-      vpc,
-      dbName,
-      fargateSecurityGroup
-    );
 
     const fargateService = defineFargateService(
       stack,
@@ -57,15 +47,10 @@ export async function deployFrontendWithServerWithDatabase({
         isImageLocal,
         imagePath,
         containerPort,
-        dbConfig: { dbInstance, dbName, dbSecret },
       }
     );
 
     const distribution = defineDistribution(stack, bucket, fargateService);
-
-    new CfnOutput(stack, "DBEndpoint", {
-      value: dbInstance.dbInstanceEndpointAddress,
-    });
 
     new CfnOutput(stack, "CloudFrontUrl", {
       value: `https://${distribution.domainName}`,

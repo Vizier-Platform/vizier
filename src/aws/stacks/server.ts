@@ -19,7 +19,6 @@ export async function deployAppServer({
   imagePath,
   containerPort,
 }: AppServerOptions): Promise<void> {
-  // fromAsset requires docker to be installed with daemon running
   if (isImageLocal) {
     await requireDocker();
   }
