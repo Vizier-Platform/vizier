@@ -9,12 +9,14 @@ import {
 } from "./partials/fargate.js";
 
 interface AppServerOptions {
+  stackName: string;
   isImageLocal: boolean;
   imagePath: string;
   containerPort: number;
 }
 
 export async function deployAppServer({
+  stackName,
   isImageLocal,
   imagePath,
   containerPort,
@@ -27,7 +29,7 @@ export async function deployAppServer({
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
-    const stack = new Stack(app, "app-server-stack");
+    const stack = new Stack(app, stackName);
 
     const vpc = defineVpc(stack);
 

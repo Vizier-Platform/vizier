@@ -12,6 +12,7 @@ import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
 
 interface FullstackOptions {
+  stackName: string;
   assetDirectory: string;
   isImageLocal: boolean;
   imagePath: string;
@@ -20,6 +21,7 @@ interface FullstackOptions {
 }
 
 export async function deployFrontendWithServerWithDatabase({
+  stackName,
   assetDirectory,
   isImageLocal,
   imagePath,
@@ -33,7 +35,7 @@ export async function deployFrontendWithServerWithDatabase({
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
-    const stack = new Stack(app, "fullstack-deployment");
+    const stack = new Stack(app, stackName);
 
     const bucket = defineBucket(stack, assetDirectory);
     const vpc = defineVpc(stack);

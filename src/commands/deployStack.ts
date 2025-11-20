@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
-import { deployS3StackFromConfig } from "../aws/stacks/frontend.js";
+import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
 import { readProperties } from "../utils/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
 
@@ -14,7 +14,7 @@ export function loadDeployCommand(program: Command, commandName: string) {
 
       switch (stackType) {
         case "front": {
-          await deployS3StackFromConfig();
+          await deployFrontendFromConfig();
           console.log(chalk.green(`Static site deployed.`));
           break;
         }

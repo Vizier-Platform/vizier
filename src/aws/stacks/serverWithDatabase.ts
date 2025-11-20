@@ -10,6 +10,7 @@ import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
 
 interface DBServerOptions {
+  stackName: string;
   isImageLocal: boolean;
   imagePath: string;
   dbName: string;
@@ -17,6 +18,7 @@ interface DBServerOptions {
 }
 
 export async function deployServerWithDatabase({
+  stackName,
   isImageLocal,
   imagePath,
   dbName,
@@ -29,7 +31,7 @@ export async function deployServerWithDatabase({
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();
-    const stack = new Stack(app, "app-server-stack");
+    const stack = new Stack(app, stackName);
 
     const vpc = defineVpc(stack);
 

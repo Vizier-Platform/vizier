@@ -31,7 +31,7 @@ async function getBucketNameFromStack(
   return bucketOutput?.OutputValue;
 }
 
-export async function deployS3StackFromConfig() {
+export async function deployFrontendFromConfig() {
   const { projectId, assetDirectory } = configFrontSchema.parse(
     readProperties("config.json")
   );
@@ -47,19 +47,24 @@ export async function deployS3StackFromConfig() {
       absoluteAssetDirectory
     );
   } else {
-    const returnedOutputs = await deployS3Stack(
-      projectId,
-      absoluteAssetDirectory
-    );
+    const returnedOutputs = await deployFrontend({
+      stackName: projectId,
+      assetDirectory: absoluteAssetDirectory,
+    });
 
     writeProperties("outputs.json", returnedOutputs);
   }
 }
 
-export async function deployS3Stack(
-  stackName: string,
-  assetDirectory: string
-): Promise<Outputs> {
+interface FrontendOptions {
+  stackName: string;
+  assetDirectory: string;
+}
+
+export async function deployFrontend({
+  stackName,
+  assetDirectory,
+}: FrontendOptions): Promise<Outputs> {
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
