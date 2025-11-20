@@ -5,8 +5,10 @@ import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import type { DatabaseInstance } from "aws-cdk-lib/aws-rds";
 import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
 
+const HEALTH_CHECK_PATH = "/health";
+
 export function defineCluster(stack: Stack, vpc: ec2.Vpc) {
-  return new ecs.Cluster(stack, "VizierFargateCluster", {
+  return new ecs.Cluster(stack, "ServerCluster", {
     vpc: vpc as ec2.IVpc,
     enableFargateCapacityProviders: true,
   });
@@ -88,7 +90,7 @@ export function defineFargateService(
   );
 
   fargateService.targetGroup.configureHealthCheck({
-    path: "/health",
+    path: HEALTH_CHECK_PATH,
     healthyHttpCodes: "200-399",
   });
   return fargateService;
