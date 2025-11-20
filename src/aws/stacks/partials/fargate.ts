@@ -20,17 +20,46 @@ export function defineFargateSecurityGroup(stack: Stack, vpc: ec2.Vpc) {
   });
 }
 
+interface DbConfig {
+  dbInstance: DatabaseInstance;
+  dbName: string;
+  dbSecret: ISecret;
+}
+
+interface FargateServiceOptions {
+  isImageLocal: boolean;
+  imagePath: string;
+  containerPort: number;
+  dbConfig?: DbConfig;
+}
+
 export function defineFargateService(
   stack: Stack,
   cluster: ecs.Cluster,
   fargateSecurityGroup: ec2.SecurityGroup,
-  isImageLocal: boolean,
-  imagePath: string,
-  dbInstance: DatabaseInstance,
-  dbName: string,
-  dbSecret: ISecret,
-  containerPort: number
+  options: FargateServiceOptions
 ) {
+  const { isImageLocal, imagePath, containerPort, dbConfig } = options;
+
+  const environment = dbConfig
+    ? {
+        DB_HOST: dbConfig.dbInstance.dbInstanceEndpointAddress,
+        DB_PORT: "5432",
+        DB_NAME: dbConfig.dbName,
+        DB_USER: "postgres",
+        NODE_ENV: "production",
+      }
+    : { NODE_ENV: "production" };
+
+  const secrets = dbConfig
+    ? {
+        DB_PASSWORD: ecs.Secret.fromSecretsManager(
+          dbConfig.dbSecret,
+          "password"
+        ),
+      }
+    : {};
+
   const image = isImageLocal
     ? ecs.ContainerImage.fromAsset(imagePath)
     : ecs.ContainerImage.fromRegistry(imagePath);
@@ -50,17 +79,9 @@ export function defineFargateService(
       },
       taskImageOptions: {
         image,
-        environment: {
-          DB_HOST: dbInstance.dbInstanceEndpointAddress,
-          DB_PORT: "5432",
-          DB_NAME: dbName,
-          DB_USER: "postgres",
-          NODE_ENV: "production",
-        },
-        secrets: {
-          DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, "password"),
-        },
-        containerPort: containerPort,
+        environment,
+        secrets,
+        containerPort,
       },
       minHealthyPercent: 100,
     }

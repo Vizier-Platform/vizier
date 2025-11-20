@@ -40,12 +40,12 @@ export async function deployFSApp(
       stack,
       cluster,
       fargateSecurityGroup,
-      isImageLocal,
-      imagePath,
-      dbInstance,
-      dbName,
-      dbSecret,
-      containerPort
+      {
+        isImageLocal,
+        imagePath,
+        containerPort,
+        dbConfig: { dbInstance, dbName, dbSecret },
+      }
     );
 
     const distribution = defineDistribution(stack, bucket, fargateService);
