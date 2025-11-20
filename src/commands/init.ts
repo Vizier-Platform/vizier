@@ -48,31 +48,22 @@ export function loadInitCommand(program: Command, commandName: string) {
 
       switch (stackType) {
         case "front": {
-          const directory = await input({
-            message: "What is the relative path to the asset directory?",
-            required: true,
-          });
+          const assetDirectory = await promptAssetDirectory();
           const frontConfig: ConfigFront = {
             ...configBase,
             stackType, // redundant but explicit to satisfy typescript
-            assetDirectory: directory,
+            assetDirectory,
           };
           config = frontConfig;
           break;
         }
         case "front+back": {
-          const directory = await input({
-            message: "What is the relative path to the asset directory?",
-            required: true,
-          });
-          const dockerfileDirectory = await input({
-            message: "What is the relative path to the Dockerfile?",
-            required: true,
-          });
+          const assetDirectory = await promptAssetDirectory();
+          const dockerfileDirectory = await promptDockerfileDirectory();
           const frontBackConfig: ConfigFrontBack = {
             ...configBase,
             stackType, // redundant but explicit to satisfy typescript
-            assetDirectory: directory,
+            assetDirectory,
             dockerfileDirectory,
           };
           config = frontBackConfig;
@@ -89,4 +80,18 @@ export function loadInitCommand(program: Command, commandName: string) {
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });
+}
+
+async function promptDockerfileDirectory() {
+  return await input({
+    message: "What is the relative path to the Dockerfile?",
+    required: true,
+  });
+}
+
+async function promptAssetDirectory() {
+  return await input({
+    message: "What is the relative path to the asset directory?",
+    required: true,
+  });
 }
