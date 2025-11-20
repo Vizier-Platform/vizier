@@ -9,6 +9,7 @@ import {
 } from "./partials/fargate.js";
 import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
+import requireDocker from "../../utils/requireDocker.js";
 
 export async function deployFSApp(
   assetDirectory: string,
@@ -17,6 +18,11 @@ export async function deployFSApp(
   dbName: string,
   containerPort: number
 ): Promise<void> {
+  // fromAsset requires docker to be installed with daemon running
+  if (isImageLocal) {
+    await requireDocker();
+  }
+
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
     const app = new App();

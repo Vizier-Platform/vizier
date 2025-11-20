@@ -1,9 +1,12 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as ecs from "aws-cdk-lib/aws-ecs";
-import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import requireDocker from "../../utils/requireDocker.js";
+import { defineVpc } from "./partials/vpc.js";
+import {
+  defineCluster,
+  defineFargateSecurityGroup,
+  defineFargateService,
+} from "./partials/fargate.js";
 
 interface AppServerOptions {
   isImageLocal: boolean;
@@ -27,35 +30,17 @@ export async function deployAppServer({
     const app = new App();
     const stack = new Stack(app, "app-server-stack");
 
-    const vpc = new ec2.Vpc(stack, "MyVpc", {
-      maxAzs: 2, // Use 2 availability zones
+    const vpc = defineVpc(stack);
+
+    const cluster = defineCluster(stack, vpc);
+
+    const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
+
+    defineFargateService(stack, cluster, fargateSecurityGroup, {
+      isImageLocal,
+      imagePath,
+      containerPort,
     });
-
-    // Bandaid solution, look into fixing 'exactOptionalPropertyTypes' error
-    const cluster = new ecs.Cluster(stack, "VizierFargateCluster", {
-      vpc: vpc as ec2.IVpc,
-      enableFargateCapacityProviders: true,
-    });
-
-    const image = isImageLocal
-      ? ecs.ContainerImage.fromAsset(imagePath)
-      : ecs.ContainerImage.fromRegistry(imagePath);
-
-    new ecsPatterns.ApplicationLoadBalancedFargateService(
-      stack,
-      "VizierFargateService",
-      {
-        cluster: cluster as ecs.ICluster,
-        memoryLimitMiB: 1024,
-        desiredCount: 1,
-        cpu: 512,
-        taskImageOptions: {
-          image: image,
-          containerPort: containerPort,
-        },
-        minHealthyPercent: 100,
-      }
-    );
 
     return app.synth();
   });
