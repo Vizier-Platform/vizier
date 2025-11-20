@@ -2,12 +2,17 @@ import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import type { Command } from "commander";
 import { writeProperties } from "../utils/outputs.js";
-import type {
-  StackType,
-  ConfigBase,
-  Config,
-  ConfigFront,
-  ConfigFrontBack,
+import {
+  type StackType,
+  type ConfigBase,
+  type Config,
+  type ConfigFront,
+  type ConfigFrontBack,
+  type ConfigBack,
+  type ConfigBackDb,
+  type ConfigFrontBackDb,
+  STACK_NAME_INVALID_CHARACTER_PATTERN,
+  stackNameSchema,
 } from "../types/index.js";
 
 export function loadInitCommand(program: Command, commandName: string) {
@@ -19,7 +24,12 @@ export function loadInitCommand(program: Command, commandName: string) {
         message: "What is the project name?",
         required: true,
       });
-      const projectId = `${projectName}-${Date.now()}`;
+
+      const characterFilteredProjectName = projectName
+        .trim()
+        .replace(STACK_NAME_INVALID_CHARACTER_PATTERN, "");
+      const projectId = `vzr-${characterFilteredProjectName}-${Date.now()}`;
+      stackNameSchema.parse(projectId);
 
       const stackType: StackType = await select<StackType>({
         message: "Select project type",
@@ -27,12 +37,29 @@ export function loadInitCommand(program: Command, commandName: string) {
           {
             name: "static site",
             value: "front",
-            description: "A static site",
+            description: "A static site (S3, Cloudfront)",
           },
           {
-            name: "frontend + backend",
+            name: "static frontend + server",
             value: "front+back",
-            description: "A static site with backend (coming soon)",
+            description:
+              "Separately hosted frontend and backend (S3, Cloudfront, ECS)",
+          },
+          {
+            name: "server only",
+            value: "back",
+            description: "All in one server (ECS)",
+          },
+          {
+            name: "server with database",
+            value: "back+db",
+            description: "A server with a database (ECS, RDS)",
+          },
+          {
+            name: "static frontend + server with database",
+            value: "front+back+db",
+            description:
+              "Separately hosted frontend and backend with database (S3, Cloudfront, ECS, RDS)",
           },
         ],
       });
@@ -47,40 +74,57 @@ export function loadInitCommand(program: Command, commandName: string) {
 
       switch (stackType) {
         case "front": {
-          const directory = await input({
-            message: "What is the relative path to the asset directory?",
-            required: true,
-          });
+          const assetDirectory = await promptAssetDirectory();
           const frontConfig: ConfigFront = {
             ...configBase,
             stackType, // redundant but explicit to satisfy typescript
-            assetDirectory: directory,
+            assetDirectory,
           };
           config = frontConfig;
           break;
         }
         case "front+back": {
-          const directory = await input({
-            message: "What is the relative path to the asset directory?",
-            required: true,
-          });
-          const dockerfileDirectory = await input({
-            message: "What is the relative path to the Dockerfile?",
-            required: true,
-          });
+          const assetDirectory = await promptAssetDirectory();
+          const dockerfileDirectory = await promptDockerfileDirectory();
           const frontBackConfig: ConfigFrontBack = {
             ...configBase,
             stackType, // redundant but explicit to satisfy typescript
-            assetDirectory: directory,
+            assetDirectory,
             dockerfileDirectory,
           };
           config = frontBackConfig;
-
-          console.error(
-            chalk.red("front+back stack type is not yet implemented.")
-          );
-          process.exit(1);
-
+          break;
+        }
+        case "back": {
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const backConfig: ConfigBack = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            dockerfileDirectory,
+          };
+          config = backConfig;
+          break;
+        }
+        case "back+db": {
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const backDbConfig: ConfigBackDb = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            dockerfileDirectory,
+          };
+          config = backDbConfig;
+          break;
+        }
+        case "front+back+db": {
+          const assetDirectory = await promptAssetDirectory();
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const frontBackDbConfig: ConfigFrontBackDb = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            assetDirectory,
+            dockerfileDirectory,
+          };
+          config = frontBackDbConfig;
           break;
         }
         default: {
@@ -94,4 +138,18 @@ export function loadInitCommand(program: Command, commandName: string) {
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });
+}
+
+async function promptDockerfileDirectory() {
+  return await input({
+    message: "What is the relative path to the Dockerfile?",
+    required: true,
+  });
+}
+
+async function promptAssetDirectory() {
+  return await input({
+    message: "What is the relative path to the asset directory?",
+    required: true,
+  });
 }

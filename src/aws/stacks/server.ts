@@ -7,20 +7,39 @@ import {
   defineFargateSecurityGroup,
   defineFargateService,
 } from "./partials/fargate.js";
+import type { ConfigBack } from "../../types/index.js";
+import path from "path";
 
-interface AppServerOptions {
+export async function deployServerFromConfig({
+  projectId,
+  dockerfileDirectory,
+}: ConfigBack) {
+  const absoluteDockerfileDirectory = path.join(
+    process.cwd(),
+    dockerfileDirectory
+  );
+
+  return deployServer({
+    stackName: projectId,
+    isImageLocal: true,
+    imagePath: absoluteDockerfileDirectory,
+    containerPort: 3000,
+  });
+}
+
+interface ServerOptions {
   stackName: string;
   isImageLocal: boolean;
   imagePath: string;
   containerPort: number;
 }
 
-export async function deployAppServer({
+export async function deployServer({
   stackName,
   isImageLocal,
   imagePath,
   containerPort,
-}: AppServerOptions): Promise<void> {
+}: ServerOptions): Promise<void> {
   if (isImageLocal) {
     await requireDocker();
   }

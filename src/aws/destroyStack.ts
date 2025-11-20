@@ -1,10 +1,10 @@
 import { StackSelectionStrategy, Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
 import { clearOutputs, readProperties } from "../utils/outputs.js";
-import { configFrontSchema } from "../types/index.js";
+import { configSchema } from "../types/index.js";
 
 export async function destroyStackFromConfig() {
-  const { projectId } = configFrontSchema.parse(readProperties("config.json"));
+  const { projectId } = configSchema.parse(readProperties("config.json"));
 
   await destroyStack(projectId);
   clearOutputs();

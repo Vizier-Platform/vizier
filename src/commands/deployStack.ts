@@ -3,6 +3,10 @@ import type { Command } from "commander";
 import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
 import { readProperties } from "../utils/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
+import { deployFrontendWithServerFromConfig } from "../aws/stacks/frontendWithServer.js";
+import { deployServerFromConfig } from "../aws/stacks/server.js";
+import { deployServerWithDatabaseFromConfig } from "../aws/stacks/serverWithDatabase.js";
+import { deployFrontendWithServerWithDatabaseFromConfig } from "../aws/stacks/frontendWithServerWithDatabase.js";
 
 export function loadDeployCommand(program: Command, commandName: string) {
   program
@@ -14,15 +18,28 @@ export function loadDeployCommand(program: Command, commandName: string) {
 
       switch (stackType) {
         case "front": {
-          await deployFrontendFromConfig();
+          await deployFrontendFromConfig(config);
           console.log(chalk.green(`Static site deployed.`));
           break;
         }
         case "front+back": {
-          console.error(
-            chalk.red("front+back stack type is not yet implemented.")
-          );
-          process.exit(1);
+          await deployFrontendWithServerFromConfig(config);
+          console.log(chalk.green(`Frontend and backend deployed.`));
+          break;
+        }
+        case "back": {
+          await deployServerFromConfig(config);
+          console.log(chalk.green(`Server deployed.`));
+          break;
+        }
+        case "back+db": {
+          await deployServerWithDatabaseFromConfig(config);
+          console.log(chalk.green(`Server with database deployed.`));
+          break;
+        }
+        case "front+back+db": {
+          await deployFrontendWithServerWithDatabaseFromConfig(config);
+          console.log(chalk.green(`Frontend, backend, and database deployed.`));
           break;
         }
         default: {
