@@ -8,6 +8,26 @@ import {
 } from "./partials/fargate.js";
 import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
+import type { ConfigBackDb } from "../../types/index.js";
+import path from "path";
+
+export async function deployServerWithDatabaseFromConfig({
+  projectId,
+  dockerfileDirectory,
+}: ConfigBackDb) {
+  const absoluteDockerfileDirectory = path.join(
+    process.cwd(),
+    dockerfileDirectory
+  );
+
+  return deployServerWithDatabase({
+    stackName: projectId,
+    isImageLocal: true,
+    imagePath: absoluteDockerfileDirectory,
+    dbName: "database",
+    containerPort: 3000,
+  });
+}
 
 interface DBServerOptions {
   stackName: string;

@@ -9,6 +9,28 @@ import {
 } from "./partials/fargate.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
+import type { ConfigFrontBack } from "../../types/index.js";
+import path from "path";
+
+export async function deployFrontendWithServerFromConfig({
+  projectId,
+  assetDirectory,
+  dockerfileDirectory,
+}: ConfigFrontBack) {
+  const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
+  const absoluteDockerfileDirectory = path.join(
+    process.cwd(),
+    dockerfileDirectory
+  );
+
+  await deployFrontendWithServer({
+    stackName: projectId,
+    assetDirectory: absoluteAssetDirectory,
+    isImageLocal: true,
+    imagePath: absoluteDockerfileDirectory,
+    containerPort: 3000,
+  });
+}
 
 interface FrontendWithServerOptions {
   stackName: string;

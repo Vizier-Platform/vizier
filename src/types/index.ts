@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-const stackTypes = ["front", "front+back"] as const;
+const stackTypes = [
+  "front",
+  "front+back",
+  "back",
+  "back+db",
+  "front+back+db",
+] as const;
 const stackTypeSchema = z.enum(stackTypes);
 export type StackType = z.infer<typeof stackTypeSchema>;
 
@@ -17,16 +23,34 @@ export const configFrontSchema = configBaseSchema.extend({
 });
 export type ConfigFront = z.infer<typeof configFrontSchema>;
 
+export const configBackSchema = configBaseSchema.extend({
+  stackType: z.literal("back"),
+  dockerfileDirectory: z.string(),
+});
+export type ConfigBack = z.infer<typeof configBackSchema>;
+
 export const configFrontBackSchema = configFrontSchema.extend({
   stackType: z.literal("front+back"),
   dockerfileDirectory: z.string(),
 });
 export type ConfigFrontBack = z.infer<typeof configFrontBackSchema>;
 
+export const configBackDbSchema = configBackSchema.extend({
+  stackType: z.literal("back+db"),
+});
+export type ConfigBackDb = z.infer<typeof configBackDbSchema>;
+
+export const configFrontBackDbSchema = configFrontBackSchema.extend({
+  stackType: z.literal("front+back+db"),
+});
+export type ConfigFrontBackDb = z.infer<typeof configFrontBackDbSchema>;
+
 export const configSchema = z.discriminatedUnion("stackType", [
   configFrontSchema,
+  configBackSchema,
   configFrontBackSchema,
-  // future extensions can go here
+  configBackDbSchema,
+  configFrontBackDbSchema,
 ]);
 export type Config = z.infer<typeof configSchema>;
 
@@ -35,3 +59,7 @@ export const outputsSchema = z.object({
 });
 
 export type Outputs = z.infer<typeof outputsSchema>;
+
+export const STACK_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
+export const STACK_NAME_INVALID_CHARACTER_PATTERN = /[^A-Za-z0-9-]/g;
+export const stackNameSchema = z.string().regex(STACK_NAME_PATTERN);

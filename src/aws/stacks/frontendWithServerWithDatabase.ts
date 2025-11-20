@@ -10,6 +10,29 @@ import {
 import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
+import type { ConfigFrontBackDb } from "../../types/index.js";
+import path from "path";
+
+export async function deployFrontendWithServerWithDatabaseFromConfig({
+  projectId,
+  assetDirectory,
+  dockerfileDirectory,
+}: ConfigFrontBackDb) {
+  const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
+  const absoluteDockerfileDirectory = path.join(
+    process.cwd(),
+    dockerfileDirectory
+  );
+
+  await deployFrontendWithServerWithDatabase({
+    stackName: projectId,
+    assetDirectory: absoluteAssetDirectory,
+    isImageLocal: true,
+    imagePath: absoluteDockerfileDirectory,
+    dbName: "database",
+    containerPort: 3000,
+  });
+}
 
 interface FullstackOptions {
   stackName: string;
