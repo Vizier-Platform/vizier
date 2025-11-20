@@ -46,13 +46,13 @@ export function defineFargateService(
         DB_HOST: dbConfig.dbInstance.dbInstanceEndpointAddress,
         DB_PORT: "5432",
         DB_NAME: dbConfig.dbName,
-        DB_USER: "postgres",
         NODE_ENV: "production",
       }
     : { NODE_ENV: "production" };
 
   const secrets = dbConfig
     ? {
+        DB_USER: ecs.Secret.fromSecretsManager(dbConfig.dbSecret, "username"),
         DB_PASSWORD: ecs.Secret.fromSecretsManager(
           dbConfig.dbSecret,
           "password"
