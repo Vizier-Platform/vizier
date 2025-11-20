@@ -57,3 +57,23 @@ Syncing:
 Teardown:
 
 - `vizier destroy my-bucket-213451254`
+
+## Supported Configuration
+
+### Project Structure
+
+- Each project must be in a single repository
+- Automatic deployment on push to GitHub requires that the `vizier init`-generated `.vizier/` and `.github/` folders be tracked by git.
+
+### Server
+
+- User must provide Dockerfile
+- Server must run on port 3000
+- Health checks are performed at `/health` and expect status code 2xx-3xx. Successful deployment depends on these health checks.
+- If using static frontend and server, paths matching `api/*` are routed to the server
+
+### Database
+
+- Database is PostgreSQL version 17
+- Database credentials are provided as environmental variables to the server
+  <!-- TODO: elaborate -->
