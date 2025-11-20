@@ -8,6 +8,7 @@ import type {
   Config,
   ConfigFront,
   ConfigFrontBack,
+  ConfigBack,
 } from "../types/index.js";
 
 export function loadInitCommand(program: Command, commandName: string) {
@@ -30,10 +31,15 @@ export function loadInitCommand(program: Command, commandName: string) {
             description: "A static site (S3, Cloudfront)",
           },
           {
-            name: "frontend + backend",
+            name: "static frontend + server",
             value: "front+back",
             description:
               "Separately hosted frontend and backend (S3, Cloudfront, ECS)",
+          },
+          {
+            name: "server only",
+            value: "back",
+            description: "All in one server (ECS)",
           },
         ],
       });
@@ -67,6 +73,16 @@ export function loadInitCommand(program: Command, commandName: string) {
             dockerfileDirectory,
           };
           config = frontBackConfig;
+          break;
+        }
+        case "back": {
+          const dockerfileDirectory = await promptDockerfileDirectory();
+          const backConfig: ConfigBack = {
+            ...configBase,
+            stackType, // redundant but explicit to satisfy typescript
+            dockerfileDirectory,
+          };
+          config = backConfig;
           break;
         }
         default: {

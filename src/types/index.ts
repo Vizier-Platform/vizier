@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const stackTypes = ["front", "front+back"] as const;
+const stackTypes = ["front", "front+back", "back"] as const;
 const stackTypeSchema = z.enum(stackTypes);
 export type StackType = z.infer<typeof stackTypeSchema>;
 
@@ -17,6 +17,12 @@ export const configFrontSchema = configBaseSchema.extend({
 });
 export type ConfigFront = z.infer<typeof configFrontSchema>;
 
+export const configBackSchema = configBaseSchema.extend({
+  stackType: z.literal("back"),
+  dockerfileDirectory: z.string(),
+});
+export type ConfigBack = z.infer<typeof configBackSchema>;
+
 export const configFrontBackSchema = configFrontSchema.extend({
   stackType: z.literal("front+back"),
   dockerfileDirectory: z.string(),
@@ -25,8 +31,8 @@ export type ConfigFrontBack = z.infer<typeof configFrontBackSchema>;
 
 export const configSchema = z.discriminatedUnion("stackType", [
   configFrontSchema,
+  configBackSchema,
   configFrontBackSchema,
-  // future extensions can go here
 ]);
 export type Config = z.infer<typeof configSchema>;
 

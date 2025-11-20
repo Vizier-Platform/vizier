@@ -4,6 +4,7 @@ import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
 import { readProperties } from "../utils/outputs.js";
 import { type Config, configSchema } from "../types/index.js";
 import { deployFrontendWithServerFromConfig } from "../aws/stacks/frontendWithServer.js";
+import { deployServerFromConfig } from "../aws/stacks/server.js";
 
 export function loadDeployCommand(program: Command, commandName: string) {
   program
@@ -22,6 +23,11 @@ export function loadDeployCommand(program: Command, commandName: string) {
         case "front+back": {
           await deployFrontendWithServerFromConfig(config);
           console.log(chalk.green(`Frontend and backend deployed.`));
+          break;
+        }
+        case "back": {
+          await deployServerFromConfig(config);
+          console.log(chalk.green(`Server deployed.`));
           break;
         }
         default: {
