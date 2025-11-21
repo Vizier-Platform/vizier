@@ -1,9 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, CfnOutput, Stack } from "aws-cdk-lib";
-import {
-  CloudFormationClient,
-  DescribeStacksCommand,
-} from "@aws-sdk/client-cloudformation";
 import path from "node:path";
 import S3ClientService from "../s3.js";
 import { readProperties, writeProperties } from "../../utils/outputs.js";
@@ -14,22 +10,7 @@ import {
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
 import { defineDistribution } from "./partials/cloudfront.js";
-
-async function getBucketNameFromStack(
-  stackName: string
-): Promise<string | undefined> {
-  const client = new CloudFormationClient({});
-  const result = await client.send(
-    new DescribeStacksCommand({ StackName: stackName })
-  );
-
-  const stack = result.Stacks?.[0];
-  const bucketOutput = stack?.Outputs?.find(
-    (output) => output.OutputKey === "BucketName"
-  );
-
-  return bucketOutput?.OutputValue;
-}
+import { getOutputFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendFromConfig({
   projectId,
@@ -88,7 +69,7 @@ export async function deployFrontend({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getBucketNameFromStack(stackName);
+  const bucketName = await getOutputFromStack(stackName, "BucketName");
 
   if (!bucketName) {
     throw new Error("Unable to determine deployed bucket name");
