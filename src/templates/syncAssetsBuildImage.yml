@@ -40,10 +40,8 @@ jobs:
             echo "$CONFIG_FILE not found. Run vizier init to generate it." >&2
             exit 1
           fi
-
           ASSET_DIR=$(jq -r '.assetDirectory // empty' "$CONFIG_FILE")
           PROJECT_ID=$(jq -r '.projectId // empty' "$CONFIG_FILE")
-
           if [ -z "$ASSET_DIR" ]; then
             echo "assetDirectory missing from $CONFIG_FILE" >&2
             cat "$CONFIG_FILE"
@@ -58,7 +56,6 @@ jobs:
             echo "Asset directory '$ASSET_DIR' not found. Ensure your build step creates it." >&2
             exit 1
           fi
-
           {
             echo "ASSET_DIR=$ASSET_DIR"
             echo "PROJECT_ID=$PROJECT_ID"
@@ -88,6 +85,20 @@ jobs:
 
       - name: Sync assets to S3
         run: aws s3 sync "$ASSET_DIR"/ s3://$S3_BUCKET/ --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          DIST_ID=$(aws cloudformation describe-stack-resources \
+            --stack-name "$PROJECT_ID" \
+            --query "StackResources[?ResourceType=='AWS::CloudFront::Distribution'].PhysicalResourceId" \
+            --output text)
+
+          if [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
+            echo "No CloudFront distribution found for stack $PROJECT_ID. Skipping invalidation."
+            exit 0
+          fi
+
+          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 
       - name: Create ECR repo if it doesn't exist
         run: |
