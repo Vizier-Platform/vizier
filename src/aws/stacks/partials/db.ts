@@ -2,10 +2,11 @@ import { Stack, RemovalPolicy } from "aws-cdk-lib";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
+const DB_NAME = "vizierDb";
+
 export function defineDb(
   stack: Stack,
   vpc: ec2.Vpc,
-  dbName: string,
   fargateSecurityGroup: ec2.SecurityGroup
 ) {
   const dbSecurityGroup = new ec2.SecurityGroup(stack, "DbSecurityGroup", {
@@ -37,7 +38,7 @@ export function defineDb(
     securityGroups: [dbSecurityGroup],
     deleteAutomatedBackups: true,
     removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
-    databaseName: dbName,
+    databaseName: DB_NAME,
     credentials: rds.Credentials.fromGeneratedSecret("postgres"),
   });
 
@@ -45,5 +46,5 @@ export function defineDb(
   if (!dbSecret) {
     throw new Error("Database secret is undefined");
   }
-  return { fargateSecurityGroup, dbInstance, dbSecret };
+  return { fargateSecurityGroup, dbInstance, dbSecret, dbName: DB_NAME };
 }

@@ -31,7 +31,6 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
     assetDirectory: absoluteAssetDirectory,
     isImageLocal: true,
     imagePath: absoluteDockerfileDirectory,
-    dbName: "database",
     containerPort: 3000,
   });
 
@@ -43,7 +42,6 @@ interface FullstackOptions {
   assetDirectory: string;
   isImageLocal: boolean;
   imagePath: string;
-  dbName: string;
   containerPort: number;
 }
 
@@ -52,7 +50,6 @@ export async function deployFrontendWithServerWithDatabase({
   assetDirectory,
   isImageLocal,
   imagePath,
-  dbName,
   containerPort,
 }: FullstackOptions): Promise<Outputs> {
   if (isImageLocal) {
@@ -71,10 +68,9 @@ export async function deployFrontendWithServerWithDatabase({
 
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
 
-    const { dbInstance, dbSecret } = defineDb(
+    const { dbInstance, dbName, dbSecret } = defineDb(
       stack,
       vpc,
-      dbName,
       fargateSecurityGroup
     );
 
