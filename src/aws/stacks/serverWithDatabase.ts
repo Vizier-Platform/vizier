@@ -24,7 +24,6 @@ export async function deployServerWithDatabaseFromConfig({
     stackName: projectId,
     isImageLocal: true,
     imagePath: absoluteDockerfileDirectory,
-    dbName: "database",
     containerPort: 3000,
   });
 }
@@ -33,7 +32,6 @@ interface DBServerOptions {
   stackName: string;
   isImageLocal: boolean;
   imagePath: string;
-  dbName: string;
   containerPort: number;
 }
 
@@ -41,7 +39,6 @@ export async function deployServerWithDatabase({
   stackName,
   isImageLocal,
   imagePath,
-  dbName,
   containerPort,
 }: DBServerOptions): Promise<void> {
   if (isImageLocal) {
@@ -59,10 +56,9 @@ export async function deployServerWithDatabase({
 
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
 
-    const { dbInstance, dbSecret } = defineDb(
+    const { dbInstance, dbName, dbSecret } = defineDb(
       stack,
       vpc,
-      dbName,
       fargateSecurityGroup
     );
 
