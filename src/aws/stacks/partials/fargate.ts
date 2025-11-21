@@ -4,6 +4,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import type { DatabaseInstance } from "aws-cdk-lib/aws-rds";
 import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
+import { Platform } from "aws-cdk-lib/aws-ecr-assets";
 
 const HEALTH_CHECK_PATH = "/health";
 
@@ -60,9 +61,10 @@ export function defineFargateService(
         ),
       }
     : {};
-
   const image = isImageLocal
-    ? ecs.ContainerImage.fromAsset(imagePath)
+    ? ecs.ContainerImage.fromAsset(imagePath, {
+        platform: Platform.LINUX_AMD64,
+      })
     : ecs.ContainerImage.fromRegistry(imagePath);
 
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
