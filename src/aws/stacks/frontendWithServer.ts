@@ -9,8 +9,10 @@ import {
 } from "./partials/fargate.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
-import type { ConfigFrontBack } from "../../types/index.js";
+import type { ConfigFrontBack, Outputs } from "../../types/index.js";
 import path from "path";
+import { getOutputFromStack } from "../getOutputFromStack.js";
+import { writeProperties } from "../../utils/outputs.js";
 
 export async function deployFrontendWithServerFromConfig({
   projectId,
@@ -23,13 +25,15 @@ export async function deployFrontendWithServerFromConfig({
     dockerfileDirectory
   );
 
-  await deployFrontendWithServer({
+  const returnedOutputs = await deployFrontendWithServer({
     stackName: projectId,
     assetDirectory: absoluteAssetDirectory,
     isImageLocal: true,
     imagePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
+
+  writeProperties("outputs.json", returnedOutputs);
 }
 
 interface FrontendWithServerOptions {
@@ -46,7 +50,7 @@ export async function deployFrontendWithServer({
   isImageLocal,
   imagePath,
   containerPort,
-}: FrontendWithServerOptions): Promise<void> {
+}: FrontendWithServerOptions): Promise<Outputs> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -76,6 +80,10 @@ export async function deployFrontendWithServer({
 
     const distribution = defineDistribution(stack, bucket, fargateService);
 
+    new CfnOutput(stack, "BucketName", {
+      value: bucket.bucketName,
+    });
+
     new CfnOutput(stack, "CloudFrontUrl", {
       value: `https://${distribution.domainName}`,
     });
@@ -88,4 +96,12 @@ export async function deployFrontendWithServer({
   });
 
   await toolkit.deploy(cloudAssemblySource);
+
+  const bucketName = await getOutputFromStack(stackName, "BucketName");
+
+  if (!bucketName) {
+    throw new Error("Unable to determine deployed bucket name");
+  }
+
+  return { bucketName };
 }
