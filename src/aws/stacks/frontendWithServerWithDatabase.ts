@@ -13,7 +13,7 @@ import requireDocker from "../../utils/requireDocker.js";
 import type { ConfigFrontBackDb, Outputs } from "../../types/index.js";
 import path from "path";
 import { writeProperties } from "../../utils/outputs.js";
-import { getOutputFromStack } from "../getOutputFromStack.js";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendWithServerWithDatabaseFromConfig({
   projectId,
@@ -109,7 +109,7 @@ export async function deployFrontendWithServerWithDatabase({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getOutputFromStack(stackName, "BucketName");
+  const [bucketName] = await getOutputsFromStack(stackName, ["BucketName"]);
 
   if (!bucketName) {
     throw new Error("Unable to determine deployed bucket name");

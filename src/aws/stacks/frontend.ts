@@ -10,7 +10,7 @@ import {
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
 import { defineDistribution } from "./partials/cloudfront.js";
-import { getOutputFromStack } from "../getOutputFromStack.js";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendFromConfig({
   projectId,
@@ -69,7 +69,7 @@ export async function deployFrontend({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getOutputFromStack(stackName, "BucketName");
+  const [bucketName] = await getOutputsFromStack(stackName, ["BucketName"]);
 
   if (!bucketName) {
     throw new Error("Unable to determine deployed bucket name");
