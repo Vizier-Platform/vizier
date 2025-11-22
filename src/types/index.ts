@@ -54,11 +54,21 @@ export const configSchema = z.discriminatedUnion("stackType", [
 ]);
 export type Config = z.infer<typeof configSchema>;
 
-export const outputsSchema = z.object({
+export const bucketOutputsSchema = z.object({
   bucketName: z.string(),
 });
+export type BucketOutputs = z.infer<typeof bucketOutputsSchema>;
 
-export type Outputs = z.infer<typeof outputsSchema>;
+export const serverOutputsSchema = z.object({
+  repositoryUri: z.string(),
+  repositoryName: z.string(),
+});
+export type ServerOutputs = z.infer<typeof serverOutputsSchema>;
+
+export const bucketAndServerSchema = bucketOutputsSchema.extend(
+  serverOutputsSchema.shape
+);
+export type BucketAndServerOutputs = z.infer<typeof bucketAndServerSchema>;
 
 export const STACK_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
 export const STACK_NAME_INVALID_CHARACTER_PATTERN = /[^A-Za-z0-9-]/g;
