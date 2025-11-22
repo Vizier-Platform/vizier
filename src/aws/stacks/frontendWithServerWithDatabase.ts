@@ -33,8 +33,7 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
   const returnedOutputs = await deployFrontendWithServerWithDatabase({
     stackName: projectId,
     assetDirectory: absoluteAssetDirectory,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
 
@@ -44,21 +43,17 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
 interface FullstackOptions {
   stackName: string;
   assetDirectory: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployFrontendWithServerWithDatabase({
   stackName,
   assetDirectory,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
 }: FullstackOptions): Promise<BucketAndServerOutputs> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+  await requireDocker();
 
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -83,8 +78,7 @@ export async function deployFrontendWithServerWithDatabase({
       cluster,
       fargateSecurityGroup,
       {
-        isImageLocal,
-        imagePath,
+        dockerfilePath,
         containerPort,
         dbConfig: { dbInstance, dbName, dbSecret },
       }

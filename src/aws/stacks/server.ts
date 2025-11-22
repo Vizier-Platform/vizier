@@ -27,8 +27,7 @@ export async function deployServerFromConfig({
 
   const returnedOutputs = deployServer({
     stackName: projectId,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
 
@@ -37,20 +36,16 @@ export async function deployServerFromConfig({
 
 interface ServerOptions {
   stackName: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployServer({
   stackName,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
 }: ServerOptions): Promise<ServerOutputs> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+  await requireDocker();
 
   const toolkit = new Toolkit();
 
@@ -65,8 +60,7 @@ export async function deployServer({
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
 
     defineFargateService(stack, cluster, fargateSecurityGroup, {
-      isImageLocal,
-      imagePath,
+      dockerfilePath,
       containerPort,
     });
 

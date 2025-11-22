@@ -28,8 +28,7 @@ export async function deployServerWithDatabaseFromConfig({
 
   const returnedOutputs = deployServerWithDatabase({
     stackName: projectId,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
 
@@ -38,20 +37,17 @@ export async function deployServerWithDatabaseFromConfig({
 
 interface DBServerOptions {
   stackName: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployServerWithDatabase({
   stackName,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
 }: DBServerOptions): Promise<ServerOutputs> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+  await requireDocker();
+
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -75,8 +71,7 @@ export async function deployServerWithDatabase({
       cluster,
       fargateSecurityGroup,
       {
-        isImageLocal,
-        imagePath,
+        dockerfilePath,
         containerPort,
         dbConfig: { dbInstance, dbName, dbSecret },
       }

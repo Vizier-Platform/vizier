@@ -32,8 +32,7 @@ interface DbConfig {
 }
 
 interface FargateServiceOptions {
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
   dbConfig?: DbConfig;
 }
@@ -44,7 +43,7 @@ export function defineFargateService(
   fargateSecurityGroup: ec2.SecurityGroup,
   options: FargateServiceOptions
 ) {
-  const { imagePath, containerPort, dbConfig } = options;
+  const { dockerfilePath, containerPort, dbConfig } = options;
 
   const environment = dbConfig
     ? {
@@ -65,7 +64,7 @@ export function defineFargateService(
     : {};
 
   const asset = new DockerImageAsset(stack, "ImageName", {
-    directory: imagePath,
+    directory: dockerfilePath,
     platform: Platform.LINUX_AMD64,
   });
 
