@@ -26,7 +26,7 @@ export async function deployServerWithDatabaseFromConfig({
     dockerfileDirectory
   );
 
-  const returnedOutputs = deployServerWithDatabase({
+  const returnedOutputs = await deployServerWithDatabase({
     stackName: projectId,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
