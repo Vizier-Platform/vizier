@@ -9,7 +9,11 @@ import {
 } from "./partials/fargate.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
-import type { ConfigFrontBack, Outputs } from "../../types/index.js";
+import {
+  outputsSchema,
+  type ConfigFrontBack,
+  type Outputs,
+} from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/outputs.js";
@@ -80,7 +84,7 @@ export async function deployFrontendWithServer({
 
     const distribution = defineDistribution(stack, bucket, fargateService);
 
-    new CfnOutput(stack, "BucketName", {
+    new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
     });
 
@@ -97,11 +101,9 @@ export async function deployFrontendWithServer({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const [bucketName] = await getOutputsFromStack(stackName, ["BucketName"]);
+  const { bucketName } = await getOutputsFromStack(stackName, ["bucketName"]);
 
-  if (!bucketName) {
-    throw new Error("Unable to determine deployed bucket name");
-  }
+  const outputs = outputsSchema.parse({ bucketName });
 
-  return { bucketName };
+  return outputs;
 }

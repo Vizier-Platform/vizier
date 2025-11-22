@@ -56,7 +56,7 @@ export async function deployFrontend({
 
     const distribution = defineDistribution(stack, bucket);
 
-    new CfnOutput(stack, "BucketName", {
+    new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
     });
 
@@ -69,11 +69,9 @@ export async function deployFrontend({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const [bucketName] = await getOutputsFromStack(stackName, ["BucketName"]);
+  const { bucketName } = await getOutputsFromStack(stackName, ["bucketName"]);
 
-  if (!bucketName) {
-    throw new Error("Unable to determine deployed bucket name");
-  }
+  const outputs = outputsSchema.parse({ bucketName });
 
-  return { bucketName };
+  return outputs;
 }
