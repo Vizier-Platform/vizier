@@ -10,9 +10,9 @@ import {
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
 import {
-  bucketOutputsSchema,
+  type BucketAndServerOutputs,
   type ConfigFrontBack,
-  type BucketOutputs,
+  bucketAndServerOutputsSchema,
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
@@ -54,7 +54,7 @@ export async function deployFrontendWithServer({
   isImageLocal,
   imagePath,
   containerPort,
-}: FrontendWithServerOptions): Promise<BucketOutputs> {
+}: FrontendWithServerOptions): Promise<BucketAndServerOutputs> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -101,9 +101,11 @@ export async function deployFrontendWithServer({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const { bucketName } = await getOutputsFromStack(stackName, ["bucketName"]);
-
-  const outputs = bucketOutputsSchema.parse({ bucketName });
-
-  return outputs;
+  return bucketAndServerOutputsSchema.parse(
+    await getOutputsFromStack(stackName, [
+      "bucketName",
+      "repositoryUri",
+      "repositoryName",
+    ])
+  );
 }

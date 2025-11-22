@@ -65,10 +65,12 @@ export const serverOutputsSchema = z.object({
 });
 export type ServerOutputs = z.infer<typeof serverOutputsSchema>;
 
-export const bucketAndServerSchema = bucketOutputsSchema.extend(
+export const bucketAndServerOutputsSchema = bucketOutputsSchema.extend(
   serverOutputsSchema.shape
 );
-export type BucketAndServerOutputs = z.infer<typeof bucketAndServerSchema>;
+export type BucketAndServerOutputs = z.infer<
+  typeof bucketAndServerOutputsSchema
+>;
 
 export const STACK_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
 export const STACK_NAME_INVALID_CHARACTER_PATTERN = /[^A-Za-z0-9-]/g;

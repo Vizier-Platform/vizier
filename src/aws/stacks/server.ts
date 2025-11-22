@@ -7,8 +7,13 @@ import {
   defineFargateSecurityGroup,
   defineFargateService,
 } from "./partials/fargate.js";
-import type { ConfigBack } from "../../types/index.js";
+import {
+  serverOutputsSchema,
+  type ConfigBack,
+  type ServerOutputs,
+} from "../../types/index.js";
 import path from "path";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployServerFromConfig({
   projectId,
@@ -39,7 +44,7 @@ export async function deployServer({
   isImageLocal,
   imagePath,
   containerPort,
-}: ServerOptions): Promise<void> {
+}: ServerOptions): Promise<ServerOutputs> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -66,4 +71,8 @@ export async function deployServer({
   });
 
   await toolkit.deploy(cloudAssemblySource);
+
+  return serverOutputsSchema.parse(
+    await getOutputsFromStack(stackName, ["repositoryUri", "repositoryName"])
+  );
 }

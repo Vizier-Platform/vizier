@@ -8,8 +8,13 @@ import {
 } from "./partials/fargate.js";
 import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
-import type { ConfigBackDb } from "../../types/index.js";
+import {
+  serverOutputsSchema,
+  type ConfigBackDb,
+  type ServerOutputs,
+} from "../../types/index.js";
 import path from "path";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployServerWithDatabaseFromConfig({
   projectId,
@@ -40,7 +45,7 @@ export async function deployServerWithDatabase({
   isImageLocal,
   imagePath,
   containerPort,
-}: DBServerOptions): Promise<void> {
+}: DBServerOptions): Promise<ServerOutputs> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -86,4 +91,8 @@ export async function deployServerWithDatabase({
   });
 
   await toolkit.deploy(cloudAssemblySource);
+
+  return serverOutputsSchema.parse(
+    await getOutputsFromStack(stackName, ["repositoryUri", "repositoryName"])
+  );
 }

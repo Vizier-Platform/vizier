@@ -11,9 +11,9 @@ import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
 import {
-  bucketOutputsSchema,
   type ConfigFrontBackDb,
-  type BucketOutputs,
+  bucketAndServerOutputsSchema,
+  type BucketAndServerOutputs,
 } from "../../types/index.js";
 import path from "path";
 import { writeProperties } from "../../utils/outputs.js";
@@ -55,7 +55,7 @@ export async function deployFrontendWithServerWithDatabase({
   isImageLocal,
   imagePath,
   containerPort,
-}: FullstackOptions): Promise<BucketOutputs> {
+}: FullstackOptions): Promise<BucketAndServerOutputs> {
   if (isImageLocal) {
     await requireDocker();
   }
@@ -113,9 +113,11 @@ export async function deployFrontendWithServerWithDatabase({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const { bucketName } = await getOutputsFromStack(stackName, ["bucketName"]);
-
-  const outputs = bucketOutputsSchema.parse({ bucketName });
-
-  return outputs;
+  return bucketAndServerOutputsSchema.parse(
+    await getOutputsFromStack(stackName, [
+      "bucketName",
+      "repositoryUri",
+      "repositoryName",
+    ])
+  );
 }
