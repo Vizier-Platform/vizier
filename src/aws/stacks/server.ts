@@ -14,6 +14,7 @@ import {
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { writeProperties } from "../../utils/outputs.js";
 
 export async function deployServerFromConfig({
   projectId,
@@ -24,12 +25,14 @@ export async function deployServerFromConfig({
     dockerfileDirectory
   );
 
-  return deployServer({
+  const returnedOutputs = deployServer({
     stackName: projectId,
     isImageLocal: true,
     imagePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
+
+  writeProperties("outputs.json", returnedOutputs);
 }
 
 interface ServerOptions {

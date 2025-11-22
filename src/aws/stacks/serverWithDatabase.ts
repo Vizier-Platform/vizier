@@ -15,6 +15,7 @@ import {
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { writeProperties } from "../../utils/outputs.js";
 
 export async function deployServerWithDatabaseFromConfig({
   projectId,
@@ -25,12 +26,14 @@ export async function deployServerWithDatabaseFromConfig({
     dockerfileDirectory
   );
 
-  return deployServerWithDatabase({
+  const returnedOutputs = deployServerWithDatabase({
     stackName: projectId,
     isImageLocal: true,
     imagePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
+
+  writeProperties("outputs.json", returnedOutputs);
 }
 
 interface DBServerOptions {
