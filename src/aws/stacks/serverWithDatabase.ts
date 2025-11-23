@@ -16,6 +16,7 @@ import {
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/outputs.js";
+import { defineDistribution } from "./partials/cloudfront.js";
 
 export async function deployServerWithDatabaseFromConfig({
   projectId,
@@ -77,8 +78,14 @@ export async function deployServerWithDatabase({
       }
     );
 
+    const distribution = defineDistribution(stack, undefined, fargateService);
+
     new CfnOutput(stack, "DBEndpoint", {
       value: dbInstance.dbInstanceEndpointAddress,
+    });
+
+    new CfnOutput(stack, "CloudFrontUrl", {
+      value: `http://${distribution.domainName}`,
     });
 
     new CfnOutput(stack, "AlbUrl", {
