@@ -78,7 +78,7 @@ export async function deployServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, undefined, fargateService);
+    const distribution = defineDistribution(stack, { fargateService });
 
     new CfnOutput(stack, "DBEndpoint", {
       value: dbInstance.dbInstanceEndpointAddress,

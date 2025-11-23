@@ -76,7 +76,7 @@ export async function deployFrontendWithServer({
       }
     );
 
-    const distribution = defineDistribution(stack, bucket, fargateService);
+    const distribution = defineDistribution(stack, { bucket, fargateService });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,

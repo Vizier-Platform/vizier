@@ -70,7 +70,7 @@ export async function deployServer({
       }
     );
 
-    const distribution = defineDistribution(stack, undefined, fargateService);
+    const distribution = defineDistribution(stack, { fargateService });
 
     new CfnOutput(stack, "CloudFrontUrl", {
       value: `http://${distribution.domainName}`,
