@@ -111,7 +111,8 @@ export async function deployFrontendWithServerWithDatabase({
     await getOutputsFromStack(stackName, [
       "bucketName",
       "repositoryUri",
-      "repositoryName",
+      "clusterName",
+      "serviceName",
     ])
   );
 }
