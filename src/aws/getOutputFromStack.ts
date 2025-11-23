@@ -3,19 +3,30 @@ import {
   DescribeStacksCommand,
 } from "@aws-sdk/client-cloudformation";
 
-export async function getOutputFromStack(
+export async function getOutputsFromStack(
   stackName: string,
-  outputKey: string
-): Promise<string | undefined> {
+  outputKeys: string[]
+): Promise<Record<string, string>> {
   const client = new CloudFormationClient({});
-  const result = await client.send(
+  const description = await client.send(
     new DescribeStacksCommand({ StackName: stackName })
   );
 
-  const stack = result.Stacks?.[0];
-  const output = stack?.Outputs?.find(
-    (output) => output.OutputKey === outputKey
-  );
+  const stack = description.Stacks?.[0];
+  if (!stack) {
+    throw new Error(`Stack ${stackName} not found`);
+  }
 
-  return output?.OutputValue;
+  const values: Record<string, string> = {};
+
+  outputKeys.forEach((key) => {
+    const output = stack?.Outputs?.find((output) => output.OutputKey === key);
+    const value = output?.OutputValue;
+    if (!value) {
+      throw new Error(`Output key ${key} not found in stack ${stackName}`);
+    }
+    values[key] = value;
+  });
+
+  return values;
 }

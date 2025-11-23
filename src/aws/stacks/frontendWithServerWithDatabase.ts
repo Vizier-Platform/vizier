@@ -10,10 +10,14 @@ import {
 import { defineDb } from "./partials/db.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import requireDocker from "../../utils/requireDocker.js";
-import type { ConfigFrontBackDb, Outputs } from "../../types/index.js";
+import {
+  type ConfigFrontBackDb,
+  bucketAndServerOutputsSchema,
+  type BucketAndServerOutputs,
+} from "../../types/index.js";
 import path from "path";
 import { writeProperties } from "../../utils/outputs.js";
-import { getOutputFromStack } from "../getOutputFromStack.js";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendWithServerWithDatabaseFromConfig({
   projectId,
@@ -29,8 +33,7 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
   const returnedOutputs = await deployFrontendWithServerWithDatabase({
     stackName: projectId,
     assetDirectory: absoluteAssetDirectory,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
 
@@ -40,21 +43,17 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
 interface FullstackOptions {
   stackName: string;
   assetDirectory: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployFrontendWithServerWithDatabase({
   stackName,
   assetDirectory,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
-}: FullstackOptions): Promise<Outputs> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+}: FullstackOptions): Promise<BucketAndServerOutputs> {
+  await requireDocker();
 
   const toolkit = new Toolkit();
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -79,8 +78,7 @@ export async function deployFrontendWithServerWithDatabase({
       cluster,
       fargateSecurityGroup,
       {
-        isImageLocal,
-        imagePath,
+        dockerfilePath,
         containerPort,
         dbConfig: { dbInstance, dbName, dbSecret },
       }
@@ -88,7 +86,7 @@ export async function deployFrontendWithServerWithDatabase({
 
     const distribution = defineDistribution(stack, bucket, fargateService);
 
-    new CfnOutput(stack, "BucketName", {
+    new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
     });
 
@@ -109,11 +107,11 @@ export async function deployFrontendWithServerWithDatabase({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getOutputFromStack(stackName, "BucketName");
-
-  if (!bucketName) {
-    throw new Error("Unable to determine deployed bucket name");
-  }
-
-  return { bucketName };
+  return bucketAndServerOutputsSchema.parse(
+    await getOutputsFromStack(stackName, [
+      "bucketName",
+      "repositoryUri",
+      "repositoryName",
+    ])
+  );
 }

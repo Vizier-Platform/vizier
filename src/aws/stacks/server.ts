@@ -7,8 +7,14 @@ import {
   defineFargateSecurityGroup,
   defineFargateService,
 } from "./partials/fargate.js";
-import type { ConfigBack } from "../../types/index.js";
+import {
+  serverOutputsSchema,
+  type ConfigBack,
+  type ServerOutputs,
+} from "../../types/index.js";
 import path from "path";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { writeProperties } from "../../utils/outputs.js";
 
 export async function deployServerFromConfig({
   projectId,
@@ -19,30 +25,27 @@ export async function deployServerFromConfig({
     dockerfileDirectory
   );
 
-  return deployServer({
+  const returnedOutputs = await deployServer({
     stackName: projectId,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
+
+  writeProperties("outputs.json", returnedOutputs);
 }
 
 interface ServerOptions {
   stackName: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployServer({
   stackName,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
-}: ServerOptions): Promise<void> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+}: ServerOptions): Promise<ServerOutputs> {
+  await requireDocker();
 
   const toolkit = new Toolkit();
 
@@ -57,8 +60,7 @@ export async function deployServer({
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
 
     defineFargateService(stack, cluster, fargateSecurityGroup, {
-      isImageLocal,
-      imagePath,
+      dockerfilePath,
       containerPort,
     });
 
@@ -66,4 +68,8 @@ export async function deployServer({
   });
 
   await toolkit.deploy(cloudAssemblySource);
+
+  return serverOutputsSchema.parse(
+    await getOutputsFromStack(stackName, ["repositoryUri", "repositoryName"])
+  );
 }
