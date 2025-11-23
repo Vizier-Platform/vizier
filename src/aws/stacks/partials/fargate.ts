@@ -81,9 +81,6 @@ export function defineFargateService(
   new CfnOutput(stack, "repositoryUri", {
     value: repository.repositoryUri,
   });
-  new CfnOutput(stack, "repositoryName", {
-    value: repository.repositoryName,
-  });
 
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
     stack,

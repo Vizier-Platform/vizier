@@ -61,7 +61,8 @@ export type BucketOutputs = z.infer<typeof bucketOutputsSchema>;
 
 export const serverOutputsSchema = z.object({
   repositoryUri: z.string(),
-  repositoryName: z.string(),
+  clusterName: z.string(),
+  serviceName: z.string(),
 });
 export type ServerOutputs = z.infer<typeof serverOutputsSchema>;
 

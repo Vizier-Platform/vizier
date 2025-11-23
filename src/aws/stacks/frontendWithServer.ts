@@ -99,7 +99,8 @@ export async function deployFrontendWithServer({
     await getOutputsFromStack(stackName, [
       "bucketName",
       "repositoryUri",
-      "repositoryName",
+      "clusterName",
+      "serviceName",
     ])
   );
 }

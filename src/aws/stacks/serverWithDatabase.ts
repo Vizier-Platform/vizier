@@ -91,6 +91,10 @@ export async function deployServerWithDatabase({
   await toolkit.deploy(cloudAssemblySource);
 
   return serverOutputsSchema.parse(
-    await getOutputsFromStack(stackName, ["repositoryUri", "repositoryName"])
+    await getOutputsFromStack(stackName, [
+      "repositoryUri",
+      "clusterName",
+      "serviceName",
+    ])
   );
 }
