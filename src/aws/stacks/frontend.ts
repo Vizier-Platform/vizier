@@ -5,12 +5,12 @@ import S3ClientService from "../s3.js";
 import { readProperties, writeProperties } from "../../utils/outputs.js";
 import {
   type ConfigFront,
-  type Outputs,
-  outputsSchema,
+  type BucketOutputs,
+  bucketOutputsSchema,
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
 import { defineDistribution } from "./partials/cloudfront.js";
-import { getOutputFromStack } from "../getOutputFromStack.js";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendFromConfig({
   projectId,
@@ -18,7 +18,7 @@ export async function deployFrontendFromConfig({
 }: ConfigFront) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
   const existingOutputs = readProperties("outputs.json");
-  const parsedOutputs = outputsSchema.safeParse(existingOutputs);
+  const parsedOutputs = bucketOutputsSchema.safeParse(existingOutputs);
 
   if (parsedOutputs.success) {
     const s3Service = new S3ClientService();
@@ -45,7 +45,7 @@ interface FrontendOptions {
 export async function deployFrontend({
   stackName,
   assetDirectory,
-}: FrontendOptions): Promise<Outputs> {
+}: FrontendOptions): Promise<BucketOutputs> {
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -56,7 +56,7 @@ export async function deployFrontend({
 
     const distribution = defineDistribution(stack, bucket);
 
-    new CfnOutput(stack, "BucketName", {
+    new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
     });
 
@@ -69,11 +69,7 @@ export async function deployFrontend({
 
   await toolkit.deploy(cloudAssemblySource);
 
-  const bucketName = await getOutputFromStack(stackName, "BucketName");
-
-  if (!bucketName) {
-    throw new Error("Unable to determine deployed bucket name");
-  }
-
-  return { bucketName };
+  return bucketOutputsSchema.parse(
+    await getOutputsFromStack(stackName, ["bucketName"])
+  );
 }

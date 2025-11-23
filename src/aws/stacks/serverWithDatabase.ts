@@ -8,8 +8,14 @@ import {
 } from "./partials/fargate.js";
 import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
-import type { ConfigBackDb } from "../../types/index.js";
+import {
+  serverOutputsSchema,
+  type ConfigBackDb,
+  type ServerOutputs,
+} from "../../types/index.js";
 import path from "path";
+import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { writeProperties } from "../../utils/outputs.js";
 
 export async function deployServerWithDatabaseFromConfig({
   projectId,
@@ -20,30 +26,28 @@ export async function deployServerWithDatabaseFromConfig({
     dockerfileDirectory
   );
 
-  return deployServerWithDatabase({
+  const returnedOutputs = await deployServerWithDatabase({
     stackName: projectId,
-    isImageLocal: true,
-    imagePath: absoluteDockerfileDirectory,
+    dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
   });
+
+  writeProperties("outputs.json", returnedOutputs);
 }
 
 interface DBServerOptions {
   stackName: string;
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
 }
 
 export async function deployServerWithDatabase({
   stackName,
-  isImageLocal,
-  imagePath,
+  dockerfilePath,
   containerPort,
-}: DBServerOptions): Promise<void> {
-  if (isImageLocal) {
-    await requireDocker();
-  }
+}: DBServerOptions): Promise<ServerOutputs> {
+  await requireDocker();
+
   const toolkit = new Toolkit();
 
   const cloudAssemblySource = await toolkit.fromAssemblyBuilder(async () => {
@@ -67,8 +71,7 @@ export async function deployServerWithDatabase({
       cluster,
       fargateSecurityGroup,
       {
-        isImageLocal,
-        imagePath,
+        dockerfilePath,
         containerPort,
         dbConfig: { dbInstance, dbName, dbSecret },
       }
@@ -86,4 +89,8 @@ export async function deployServerWithDatabase({
   });
 
   await toolkit.deploy(cloudAssemblySource);
+
+  return serverOutputsSchema.parse(
+    await getOutputsFromStack(stackName, ["repositoryUri", "repositoryName"])
+  );
 }

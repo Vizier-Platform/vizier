@@ -1,10 +1,12 @@
-import type { Stack } from "aws-cdk-lib";
+import { CfnOutput, type Stack } from "aws-cdk-lib";
 import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import type { DatabaseInstance } from "aws-cdk-lib/aws-rds";
 import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
-import { Platform } from "aws-cdk-lib/aws-ecr-assets";
+import { DockerImageAsset, Platform } from "aws-cdk-lib/aws-ecr-assets";
+import * as ecrdeploy from "cdk-ecr-deployment";
 
 const HEALTH_CHECK_PATH = "/health";
 
@@ -30,8 +32,7 @@ interface DbConfig {
 }
 
 interface FargateServiceOptions {
-  isImageLocal: boolean;
-  imagePath: string;
+  dockerfilePath: string;
   containerPort: number;
   dbConfig?: DbConfig;
 }
@@ -42,7 +43,7 @@ export function defineFargateService(
   fargateSecurityGroup: ec2.SecurityGroup,
   options: FargateServiceOptions
 ) {
-  const { isImageLocal, imagePath, containerPort, dbConfig } = options;
+  const { dockerfilePath, containerPort, dbConfig } = options;
 
   const environment = dbConfig
     ? {
@@ -61,11 +62,28 @@ export function defineFargateService(
         ),
       }
     : {};
-  const image = isImageLocal
-    ? ecs.ContainerImage.fromAsset(imagePath, {
-        platform: Platform.LINUX_AMD64,
-      })
-    : ecs.ContainerImage.fromRegistry(imagePath);
+
+  const asset = new DockerImageAsset(stack, "ImageName", {
+    directory: dockerfilePath,
+    platform: Platform.LINUX_AMD64,
+  });
+
+  const repository = new ecr.Repository(stack, "MyRepository");
+
+  new ecrdeploy.ECRDeployment(stack, "DeployDockerImage", {
+    src: new ecrdeploy.DockerImageName(asset.imageUri) as ecrdeploy.IImageName,
+    dest: new ecrdeploy.DockerImageName(
+      `${repository.repositoryUri}:latest`
+    ) as ecrdeploy.IImageName,
+  });
+
+  const image = ecs.ContainerImage.fromEcrRepository(repository);
+  new CfnOutput(stack, "repositoryUri", {
+    value: asset.repository.repositoryUri,
+  });
+  new CfnOutput(stack, "repositoryName", {
+    value: asset.repository.repositoryName,
+  });
 
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
     stack,
