@@ -6,22 +6,18 @@ import type { Bucket } from "aws-cdk-lib/aws-s3";
 
 const API_BEHAVIOR_PATH = "api/*";
 
-export function defineDistribution(
-  stack: Stack,
-  bucket?: Bucket,
-  fargateService?: ApplicationLoadBalancedFargateService
-) {
-  if (!bucket && !fargateService) {
-    throw new Error(
-      "defineDistribution requires at least a bucket or a Fargate service."
-    );
-  }
+type options =
+  | { bucket: Bucket; fargateService: ApplicationLoadBalancedFargateService }
+  | { bucket: Bucket }
+  | { fargateService: ApplicationLoadBalancedFargateService };
 
-  const defaultOrigin = bucket
-    ? new origins.S3StaticWebsiteOrigin(bucket)
-    : new origins.LoadBalancerV2Origin(fargateService!.loadBalancer, {
-        protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-      });
+export function defineDistribution(stack: Stack, props: options) {
+  const defaultOrigin =
+    "bucket" in props
+      ? new origins.S3StaticWebsiteOrigin(props.bucket)
+      : new origins.LoadBalancerV2Origin(props.fargateService.loadBalancer, {
+          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+        });
 
   const distribution = new cloudfront.Distribution(
     stack,
@@ -50,10 +46,10 @@ export function defineDistribution(
     }
   );
 
-  if (fargateService) {
+  if ("bucket" in props && "fargateService" in props) {
     distribution.addBehavior(
       API_BEHAVIOR_PATH,
-      new origins.LoadBalancerV2Origin(fargateService.loadBalancer, {
+      new origins.LoadBalancerV2Origin(props.fargateService.loadBalancer, {
         protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
       }),
       {
