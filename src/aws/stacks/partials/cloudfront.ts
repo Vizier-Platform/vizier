@@ -8,16 +8,28 @@ const API_BEHAVIOR_PATH = "api/*";
 
 export function defineDistribution(
   stack: Stack,
-  bucket: Bucket,
+  bucket?: Bucket,
   fargateService?: ApplicationLoadBalancedFargateService
 ) {
+  if (!bucket && !fargateService) {
+    throw new Error(
+      "defineDistribution requires at least a bucket or a Fargate service."
+    );
+  }
+
+  const defaultOrigin = bucket
+    ? new origins.S3StaticWebsiteOrigin(bucket)
+    : new origins.LoadBalancerV2Origin(fargateService!.loadBalancer, {
+        protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+      });
+
   const distribution = new cloudfront.Distribution(
     stack,
     "FullStackDistribution",
     {
       defaultRootObject: "index.html",
       defaultBehavior: {
-        origin: new origins.S3StaticWebsiteOrigin(bucket),
+        origin: defaultOrigin,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
       },
