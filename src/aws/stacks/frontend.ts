@@ -54,7 +54,7 @@ export async function deployFrontend({
 
     const bucket = defineBucket(stack, assetDirectory);
 
-    const distribution = defineDistribution(stack, bucket);
+    const distribution = defineDistribution(stack, { bucket });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,

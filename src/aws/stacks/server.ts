@@ -1,5 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, Stack } from "aws-cdk-lib";
+import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
 import {
@@ -15,6 +15,7 @@ import {
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/outputs.js";
+import { defineDistribution } from "./partials/cloudfront.js";
 
 export async function deployServerFromConfig({
   projectId,
@@ -59,9 +60,20 @@ export async function deployServer({
 
     const fargateSecurityGroup = defineFargateSecurityGroup(stack, vpc);
 
-    defineFargateService(stack, cluster, fargateSecurityGroup, {
-      dockerfilePath,
-      containerPort,
+    const fargateService = defineFargateService(
+      stack,
+      cluster,
+      fargateSecurityGroup,
+      {
+        dockerfilePath,
+        containerPort,
+      }
+    );
+
+    const distribution = defineDistribution(stack, { fargateService });
+
+    new CfnOutput(stack, "CloudFrontUrl", {
+      value: `http://${distribution.domainName}`,
     });
 
     return app.synth();
