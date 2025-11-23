@@ -61,7 +61,7 @@ jobs:
             echo "PROJECT_ID=$PROJECT_ID"
           } >> "$GITHUB_ENV"
 
-      - name: Read bucketName from outputs
+      - name: Read bucket/repository/cluster/service from outputs
         run: |
           OUTPUTS_FILE=".vizier/outputs.json"
           if [ ! -f "$OUTPUTS_FILE" ]; then
@@ -69,12 +69,20 @@ jobs:
             exit 1
           fi
           BUCKET_NAME=$(jq -r '.bucketName // empty' "$OUTPUTS_FILE")
-          if [ -z "$BUCKET_NAME" ]; then
-            echo "bucketName missing from $OUTPUTS_FILE" >&2
+          REPOSITORY_URI=$(jq -r '.repositoryUri // empty' "$OUTPUTS_FILE")
+          CLUSTER_NAME=$(jq -r '.clusterName // empty' "$OUTPUTS_FILE")
+          SERVICE_NAME=$(jq -r '.serviceName // empty' "$OUTPUTS_FILE")
+          if [ -z "$BUCKET_NAME" ] || [ -z "$REPOSITORY_URI" ] || [ -z "$CLUSTER_NAME" ] || [ -z "$SERVICE_NAME" ]; then
+            echo "bucketName, repositoryUri, clusterName, or serviceName missing from $OUTPUTS_FILE" >&2
             cat "$OUTPUTS_FILE"
             exit 1
           fi
-          echo "S3_BUCKET=$BUCKET_NAME" >> "$GITHUB_ENV"
+          {
+            echo "S3_BUCKET=$BUCKET_NAME"
+            echo "REPOSITORY_URI=$REPOSITORY_URI"
+            echo "CLUSTER_NAME=$CLUSTER_NAME"
+            echo "SERVICE_NAME=$SERVICE_NAME"
+          } >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -100,11 +108,6 @@ jobs:
 
           aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 
-      - name: Create ECR repo if it doesn't exist
-        run: |
-          aws ecr describe-repositories --repository-names "$PROJECT_ID" || \
-          aws ecr create-repository --repository-name "$PROJECT_ID"
-
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -114,9 +117,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_ID }}:${{ github.sha }}
+          tags: ${{ env.REPOSITORY_URI }}:latest
 
-      - name: Capture image URL
-        id: push-image
+      - name: Force new ECS deployment
         run: |
-          echo "image_url=${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_ID }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          aws ecs update-service \
+            --cluster "$CLUSTER_NAME" \
+            --service "$SERVICE_NAME" \
+            --force-new-deployment

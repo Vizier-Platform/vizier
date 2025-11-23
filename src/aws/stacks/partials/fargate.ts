@@ -79,10 +79,10 @@ export function defineFargateService(
 
   const image = ecs.ContainerImage.fromEcrRepository(repository);
   new CfnOutput(stack, "repositoryUri", {
-    value: asset.repository.repositoryUri,
+    value: repository.repositoryUri,
   });
   new CfnOutput(stack, "repositoryName", {
-    value: asset.repository.repositoryName,
+    value: repository.repositoryName,
   });
 
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
@@ -112,5 +112,12 @@ export function defineFargateService(
     path: HEALTH_CHECK_PATH,
     healthyHttpCodes: "200-399",
   });
+  new CfnOutput(stack, "clusterName", {
+    value: cluster.clusterName,
+  });
+  new CfnOutput(stack, "serviceName", {
+    value: fargateService.service.serviceName,
+  });
+
   return fargateService;
 }
