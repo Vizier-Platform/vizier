@@ -17,7 +17,7 @@ export async function deployFrontendFromConfig({
   assetDirectory,
 }: ConfigFront) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
-  const existingOutputs = readProperties("outputs.json");
+  const existingOutputs = readProperties(".vizier/outputs.json");
   const parsedOutputs = bucketOutputsSchema.safeParse(existingOutputs);
 
   if (parsedOutputs.success) {
@@ -33,7 +33,7 @@ export async function deployFrontendFromConfig({
       assetDirectory: absoluteAssetDirectory,
     });
 
-    writeProperties("outputs.json", returnedOutputs);
+    writeProperties(".vizier/outputs.json", returnedOutputs);
   }
 }
 

@@ -33,7 +33,7 @@ export async function deployServerWithDatabaseFromConfig({
     containerPort: 3000,
   });
 
-  writeProperties("outputs.json", returnedOutputs);
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface DBServerOptions {

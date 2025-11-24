@@ -36,7 +36,7 @@ export async function deployFrontendWithServerFromConfig({
     containerPort: 3000,
   });
 
-  writeProperties("outputs.json", returnedOutputs);
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface FrontendWithServerOptions {
