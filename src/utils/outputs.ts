@@ -26,7 +26,7 @@ export function writeProperties(
   fs.writeFileSync(absolutePath, JSON.stringify(properties, null, 2));
 }
 
-export function deleteDirectory(directory: string): void {
+export function deletePath(directory: string): void {
   const absolutePath = path.join(process.cwd(), directory);
 
   fs.rmSync(absolutePath, { recursive: true, force: true });
