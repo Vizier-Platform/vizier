@@ -1,11 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const VIZIER_DIR = path.join(process.cwd(), ".vizier");
-const OUTPUTS_PATH = path.join(VIZIER_DIR, "outputs.json");
-
-export function readProperties(fileName: string): object | undefined {
-  const absolutePath = path.join(VIZIER_DIR, fileName);
+export function readProperties(relativePath: string): object | undefined {
+  const absolutePath = path.join(process.cwd(), relativePath);
 
   if (!fs.existsSync(absolutePath)) {
     return undefined;
@@ -19,17 +16,18 @@ export function readProperties(fileName: string): object | undefined {
   }
 }
 
-export function writeProperties(fileName: string, properties: object): void {
-  fs.mkdirSync(VIZIER_DIR, { recursive: true });
-  fs.writeFileSync(
-    path.join(VIZIER_DIR, fileName),
-    JSON.stringify(properties, null, 2)
-  );
+export function writeProperties(
+  relativePath: string,
+  properties: object
+): void {
+  const absolutePath = path.join(process.cwd(), relativePath);
+
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, JSON.stringify(properties, null, 2));
 }
 
-export function clearOutputs(): void {
-  if (!fs.existsSync(OUTPUTS_PATH)) {
-    return;
-  }
-  fs.writeFileSync(OUTPUTS_PATH, "");
+export function deleteDirectory(directory: string): void {
+  const absolutePath = path.join(process.cwd(), directory);
+
+  fs.rmSync(absolutePath, { recursive: true, force: true });
 }
