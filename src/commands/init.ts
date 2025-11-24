@@ -134,7 +134,7 @@ export function loadInitCommand(program: Command, commandName: string) {
         }
       }
 
-      writeProperties("config.json", config);
+      writeProperties(".vizier/config.json", config);
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });

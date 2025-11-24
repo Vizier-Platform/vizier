@@ -13,7 +13,9 @@ export function loadDeployCommand(program: Command, commandName: string) {
     .command(commandName)
     .description("Deploy static site to CloudFormation Stack")
     .action(async () => {
-      const config: Config = configSchema.parse(readProperties("config.json"));
+      const config: Config = configSchema.parse(
+        readProperties(".vizier/config.json")
+      );
       const { stackType } = config;
 
       switch (stackType) {

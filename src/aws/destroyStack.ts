@@ -4,7 +4,9 @@ import { deletePath, readProperties } from "../utils/outputs.js";
 import { configSchema } from "../types/index.js";
 
 export async function destroyStackFromConfig() {
-  const { projectId } = configSchema.parse(readProperties("config.json"));
+  const { projectId } = configSchema.parse(
+    readProperties(".vizier/config.json")
+  );
 
   await destroyStack(projectId);
 
