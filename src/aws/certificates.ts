@@ -32,9 +32,14 @@ export async function deleteCertificate(certArn: string): Promise<void> {
   }
 }
 
+type ValidationDetails = acm.DomainValidation & {
+  ResourceRecord: acm.ResourceRecord;
+  ValidationStatus: string;
+};
+
 export async function getCertificateDomainValidation(
   certArn: string
-): Promise<acm.DomainValidation> {
+): Promise<ValidationDetails> {
   const acmClient = new acm.ACMClient({ region: REGION });
 
   const describeCertCommand = new acm.DescribeCertificateCommand({
@@ -59,9 +64,13 @@ export async function getCertificateDomainValidation(
   const domainValidation =
     certDetails?.Certificate?.DomainValidationOptions?.[0];
 
-  if (!domainValidation?.ResourceRecord) {
+  if (!domainValidation?.ResourceRecord || !domainValidation.ValidationStatus) {
     throw new Error("Failed to get domain validation options for certificate");
   }
 
-  return domainValidation;
+  return {
+    ...domainValidation,
+    ResourceRecord: domainValidation.ResourceRecord,
+    ValidationStatus: domainValidation.ValidationStatus,
+  };
 }
