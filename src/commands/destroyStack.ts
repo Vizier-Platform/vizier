@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { destroyStackFromConfig } from "../aws/destroyStack.js";
+import { deletePath } from "../utils/readWrite.js";
 
 export function loadDestroyCommand(program: Command, commandName: string) {
   program
@@ -9,5 +10,8 @@ export function loadDestroyCommand(program: Command, commandName: string) {
     .action(async () => {
       await destroyStackFromConfig();
       console.log(chalk.yellow("Stack destroyed."));
+
+      deletePath(".github/workflows/vizier.yml");
+      console.log("GitHub Actions workflow removed.");
     });
 }

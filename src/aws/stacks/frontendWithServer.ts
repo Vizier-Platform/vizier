@@ -16,7 +16,7 @@ import {
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
-import { writeProperties } from "../../utils/outputs.js";
+import { writeProperties } from "../../utils/readWrite.js";
 
 export async function deployFrontendWithServerFromConfig({
   projectId,
@@ -36,7 +36,7 @@ export async function deployFrontendWithServerFromConfig({
     containerPort: 3000,
   });
 
-  writeProperties("outputs.json", returnedOutputs);
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface FrontendWithServerOptions {

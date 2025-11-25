@@ -15,7 +15,7 @@ import {
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
-import { writeProperties } from "../../utils/outputs.js";
+import { writeProperties } from "../../utils/readWrite.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 
 export async function deployServerWithDatabaseFromConfig({
@@ -33,7 +33,7 @@ export async function deployServerWithDatabaseFromConfig({
     containerPort: 3000,
   });
 
-  writeProperties("outputs.json", returnedOutputs);
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface DBServerOptions {
