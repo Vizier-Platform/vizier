@@ -14,7 +14,7 @@ type OriginOptions =
   | { fargateService: ApplicationLoadBalancedFargateService };
 
 type DistributionOptions = OriginOptions & {
-  domainConfig?: DomainConfig;
+  domainConfig?: DomainConfig | undefined;
 };
 
 export function defineDistribution(stack: Stack, options: DistributionOptions) {
