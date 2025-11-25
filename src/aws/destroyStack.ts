@@ -1,13 +1,16 @@
 import { StackSelectionStrategy, Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
-import { clearOutputs, readProperties } from "../utils/outputs.js";
+import { deletePath, readProperties } from "../utils/readWrite.js";
 import { configSchema } from "../types/index.js";
 
 export async function destroyStackFromConfig() {
-  const { projectId } = configSchema.parse(readProperties("config.json"));
+  const { projectId } = configSchema.parse(
+    readProperties(".vizier/config.json")
+  );
 
   await destroyStack(projectId);
-  clearOutputs();
+
+  deletePath(".vizier/outputs.json");
 }
 
 export async function destroyStack(stackName: string) {

@@ -16,7 +16,7 @@ import {
   type BucketAndServerOutputs,
 } from "../../types/index.js";
 import path from "path";
-import { writeProperties } from "../../utils/outputs.js";
+import { writeProperties } from "../../utils/readWrite.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendWithServerWithDatabaseFromConfig({
@@ -37,7 +37,7 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
     containerPort: 3000,
   });
 
-  writeProperties("outputs.json", returnedOutputs);
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface FullstackOptions {

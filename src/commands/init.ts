@@ -1,7 +1,7 @@
 import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import type { Command } from "commander";
-import { writeProperties } from "../utils/outputs.js";
+import { writeProperties } from "../utils/readWrite.js";
 import {
   type StackType,
   type ConfigBase,
@@ -48,12 +48,12 @@ export function loadInitCommand(program: Command, commandName: string) {
           {
             name: "server only",
             value: "back",
-            description: "All in one server (ECS)",
+            description: "All in one server (Cloudfront, ECS)",
           },
           {
             name: "server with database",
             value: "back+db",
-            description: "A server with a database (ECS, RDS)",
+            description: "A server with a database (Cloudfront, ECS, RDS)",
           },
           {
             name: "static frontend + server with database",
@@ -134,7 +134,7 @@ export function loadInitCommand(program: Command, commandName: string) {
         }
       }
 
-      writeProperties("config.json", config);
+      writeProperties(".vizier/config.json", config);
       console.log("Project initialized successfully.");
       console.log("Run vizier deploy to deploy your application.");
     });

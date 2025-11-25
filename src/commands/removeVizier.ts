@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { confirm } from "@inquirer/prompts";
 import chalk from "chalk";
+import { deletePath } from "../utils/readWrite.js";
 
 export function loadRemoveVizierCommand(program: Command, commandName: string) {
   program
@@ -17,14 +18,7 @@ export function loadRemoveVizierCommand(program: Command, commandName: string) {
         return;
       }
 
-      // delete the .vizier directory if it exists
-      const fs = await import("fs");
-      const path = await import("path");
-      const vizierConfigPath = path.join(process.cwd(), ".vizier");
-
-      if (fs.existsSync(vizierConfigPath)) {
-        fs.rmSync(vizierConfigPath, { recursive: true, force: true });
-      }
+      deletePath(".vizier");
       console.log("Vizier configuration removed from project.");
     });
 }
