@@ -77,7 +77,7 @@ export function loadInitCommand(program: Command, commandName: string) {
           const assetDirectory = await promptAssetDirectory();
           const frontConfig: ConfigFront = {
             ...configBase,
-            stackType, // redundant but explicit to satisfy typescript
+            stackType,
             assetDirectory,
           };
           config = frontConfig;
@@ -88,7 +88,7 @@ export function loadInitCommand(program: Command, commandName: string) {
           const dockerfileDirectory = await promptDockerfileDirectory();
           const frontBackConfig: ConfigFrontBack = {
             ...configBase,
-            stackType, // redundant but explicit to satisfy typescript
+            stackType,
             assetDirectory,
             dockerfileDirectory,
           };
@@ -99,7 +99,7 @@ export function loadInitCommand(program: Command, commandName: string) {
           const dockerfileDirectory = await promptDockerfileDirectory();
           const backConfig: ConfigBack = {
             ...configBase,
-            stackType, // redundant but explicit to satisfy typescript
+            stackType,
             dockerfileDirectory,
           };
           config = backConfig;
@@ -109,7 +109,7 @@ export function loadInitCommand(program: Command, commandName: string) {
           const dockerfileDirectory = await promptDockerfileDirectory();
           const backDbConfig: ConfigBackDb = {
             ...configBase,
-            stackType, // redundant but explicit to satisfy typescript
+            stackType,
             dockerfileDirectory,
           };
           config = backDbConfig;
@@ -120,7 +120,7 @@ export function loadInitCommand(program: Command, commandName: string) {
           const dockerfileDirectory = await promptDockerfileDirectory();
           const frontBackDbConfig: ConfigFrontBackDb = {
             ...configBase,
-            stackType, // redundant but explicit to satisfy typescript
+            stackType,
             assetDirectory,
             dockerfileDirectory,
           };
