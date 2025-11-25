@@ -1,6 +1,6 @@
 import { StackSelectionStrategy, Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, Stack } from "aws-cdk-lib";
-import { deletePath, readProperties } from "../utils/outputs.js";
+import { deletePath, readProperties } from "../utils/readWrite.js";
 import { configSchema } from "../types/index.js";
 
 export async function destroyStackFromConfig() {

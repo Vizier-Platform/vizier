@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
-import { readProperties, writeText } from "../utils/outputs.js";
+import { readProperties, writeText } from "../utils/readWrite.js";
 import { type Config, configSchema } from "../types/index.js";
 import { deployFrontendWithServerFromConfig } from "../aws/stacks/frontendWithServer.js";
 import { deployServerFromConfig } from "../aws/stacks/server.js";

@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { confirm } from "@inquirer/prompts";
 import chalk from "chalk";
-import { deletePath } from "../utils/outputs.js";
+import { deletePath } from "../utils/readWrite.js";
 
 export function loadRemoveVizierCommand(program: Command, commandName: string) {
   program

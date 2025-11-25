@@ -1,7 +1,7 @@
 import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import type { Command } from "commander";
-import { writeProperties } from "../utils/outputs.js";
+import { writeProperties } from "../utils/readWrite.js";
 import {
   type StackType,
   type ConfigBase,

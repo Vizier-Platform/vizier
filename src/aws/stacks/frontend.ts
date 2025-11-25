@@ -2,7 +2,7 @@ import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import path from "node:path";
 import S3ClientService from "../s3.js";
-import { readProperties, writeProperties } from "../../utils/outputs.js";
+import { readProperties, writeProperties } from "../../utils/readWrite.js";
 import {
   type ConfigFront,
   type BucketOutputs,

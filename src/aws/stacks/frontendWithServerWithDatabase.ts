@@ -16,7 +16,7 @@ import {
   type BucketAndServerOutputs,
 } from "../../types/index.js";
 import path from "path";
-import { writeProperties } from "../../utils/outputs.js";
+import { writeProperties } from "../../utils/readWrite.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 
 export async function deployFrontendWithServerWithDatabaseFromConfig({
