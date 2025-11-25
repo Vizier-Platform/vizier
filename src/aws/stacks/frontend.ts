@@ -1,8 +1,7 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import path from "node:path";
-import S3ClientService from "../s3.js";
-import { readProperties, writeProperties } from "../../utils/readWrite.js";
+import { writeProperties } from "../../utils/readWrite.js";
 import {
   type ConfigFront,
   type BucketOutputs,
@@ -17,24 +16,13 @@ export async function deployFrontendFromConfig({
   assetDirectory,
 }: ConfigFront) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
-  const existingOutputs = readProperties(".vizier/outputs.json");
-  const parsedOutputs = bucketOutputsSchema.safeParse(existingOutputs);
 
-  if (parsedOutputs.success) {
-    const s3Service = new S3ClientService();
+  const returnedOutputs = await deployFrontend({
+    stackName: projectId,
+    assetDirectory: absoluteAssetDirectory,
+  });
 
-    await s3Service.syncDirectory(
-      parsedOutputs.data.bucketName,
-      absoluteAssetDirectory
-    );
-  } else {
-    const returnedOutputs = await deployFrontend({
-      stackName: projectId,
-      assetDirectory: absoluteAssetDirectory,
-    });
-
-    writeProperties(".vizier/outputs.json", returnedOutputs);
-  }
+  writeProperties(".vizier/outputs.json", returnedOutputs);
 }
 
 interface FrontendOptions {
