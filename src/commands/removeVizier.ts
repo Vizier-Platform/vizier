@@ -19,7 +19,6 @@ export function loadRemoveVizierCommand(program: Command, commandName: string) {
       }
 
       deletePath(".vizier");
-
       console.log("Vizier configuration removed from project.");
     });
 }
