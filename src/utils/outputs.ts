@@ -26,6 +26,13 @@ export function writeProperties(
   fs.writeFileSync(absolutePath, JSON.stringify(properties, null, 2));
 }
 
+export function writeText(relativePath: string, text: string): void {
+  const absolutePath = path.join(process.cwd(), relativePath);
+
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, text, "utf8");
+}
+
 export function deletePath(relativePath: string): void {
   const absolutePath = path.join(process.cwd(), relativePath);
 

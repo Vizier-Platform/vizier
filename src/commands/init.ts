@@ -48,12 +48,12 @@ export function loadInitCommand(program: Command, commandName: string) {
           {
             name: "server only",
             value: "back",
-            description: "All in one server (ECS)",
+            description: "All in one server (Cloudfront, ECS)",
           },
           {
             name: "server with database",
             value: "back+db",
-            description: "A server with a database (ECS, RDS)",
+            description: "A server with a database (Cloudfront, ECS, RDS)",
           },
           {
             name: "static frontend + server with database",
