@@ -11,7 +11,7 @@ export function loadDestroyCommand(program: Command, commandName: string) {
       await destroyStackFromConfig();
       console.log(chalk.yellow("Stack destroyed."));
 
-      deletePath(".github");
+      deletePath(".github/workflows/vizier.yml");
       console.log("GitHub Actions workflow removed.");
     });
 }
