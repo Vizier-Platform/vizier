@@ -4,6 +4,7 @@ import { loadInitCommand } from "./init.js";
 import { loadDeployCommand } from "./deployStack.js";
 import { loadDestroyCommand } from "./destroyStack.js";
 import { loadRemoveVizierCommand } from "./removeVizier.js";
+import { loadDomainSetupCommand } from "./domainSetup.js";
 
 export const loadCommands = (program: Command) => {
   // command names specified here so that they are
@@ -13,6 +14,7 @@ export const loadCommands = (program: Command) => {
 
   loadInitCommand(program, "init");
   loadDeployCommand(program, "deploy");
+  loadDomainSetupCommand(program, "domain-setup");
   loadDestroyCommand(program, "destroy");
   loadRemoveVizierCommand(program, "remove");
 };

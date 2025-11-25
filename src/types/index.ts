@@ -73,6 +73,12 @@ export type BucketAndServerOutputs = z.infer<
   typeof bucketAndServerOutputsSchema
 >;
 
+export const domainConfigSchema = z.object({
+  domainName: z.string(),
+  certArn: z.string(),
+});
+export type DomainConfig = z.infer<typeof domainConfigSchema>;
+
 export const STACK_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
 export const STACK_NAME_INVALID_CHARACTER_PATTERN = /[^A-Za-z0-9-]/g;
 export const stackNameSchema = z.string().regex(STACK_NAME_PATTERN);
