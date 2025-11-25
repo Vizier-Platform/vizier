@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { input } from "@inquirer/prompts";
-import { writeProperties } from "../utils/outputs.js";
+import { writeProperties } from "../utils/readWrite.js";
 import {
   deleteCertificate,
   getCertificateDomainValidation,
@@ -76,7 +76,7 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
       console.log(chalk.green(`Certificate validated successfully!`));
 
       const domainConfig: DomainConfig = { domainName, certArn };
-      writeProperties("domain.json", domainConfig);
+      writeProperties(".vizier/domain.json", domainConfig);
       console.log(
         chalk.green(
           `Domain configuration saved to domain.json. You can now proceed to deploy your application with the custom domain.`
