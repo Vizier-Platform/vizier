@@ -1,6 +1,10 @@
 import chalk from "chalk";
 import type { Command } from "commander";
-import { readProperties, writeProperties } from "../utils/readWrite.js";
+import {
+  deletePath,
+  readProperties,
+  writeProperties,
+} from "../utils/readWrite.js";
 import { domainConfigSchema } from "../types/index.js";
 import { deployStack } from "./deployStack.js";
 import { deleteCertificate } from "../aws/certificates.js";
@@ -16,8 +20,8 @@ export function loadDomainRemoveCommand(program: Command, commandName: string) {
       );
 
       try {
-        // clear the configuration file
-        writeProperties(".vizier/domain.json", {});
+        // delete the configuration file
+        deletePath(".vizier/domain.json");
 
         // redeploy the stack without domain settings
         console.log(chalk.blue("Redeploying stack without domain settings..."));
