@@ -19,6 +19,7 @@ import {
 import path from "path";
 import { writeProperties } from "../../utils/readWrite.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { printDnsRecordInstructions } from "../../commands/domainSetup.js";
 
 export async function deployFrontendWithServerWithDatabaseFromConfig(
   { projectId, assetDirectory, dockerfileDirectory }: ConfigFrontBackDb,
@@ -39,6 +40,17 @@ export async function deployFrontendWithServerWithDatabaseFromConfig(
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
+
+  if (domainConfig) {
+    printDnsRecordInstructions(
+      "To direct traffic to your custom domain, make sure you create the following DNS record:",
+      {
+        Type: "CNAME",
+        Name: domainConfig.domainName,
+        Value: returnedOutputs.cloudfrontDomain,
+      }
+    );
+  }
 }
 
 interface FullstackOptions {

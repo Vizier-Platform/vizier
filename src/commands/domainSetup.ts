@@ -30,7 +30,10 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
 
       console.log(chalk.green(`Certificate requested successfully!`));
 
-      printDnsRecordInstructions(validation.ResourceRecord);
+      printDnsRecordInstructions(
+        `To validate domain ownership, please create the following DNS record:`,
+        validation.ResourceRecord
+      );
 
       console.log(
         chalk.yellow(
@@ -84,16 +87,19 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
     });
 }
 
-export function printDnsRecordInstructions({
-  Type,
-  Name,
-  Value,
-}: {
-  Type: string;
-  Name: string;
-  Value: string;
-}) {
-  console.log(chalk.yellow(`Please create the following DNS record:`));
+export function printDnsRecordInstructions(
+  message: string,
+  {
+    Type,
+    Name,
+    Value,
+  }: {
+    Type: string;
+    Name: string;
+    Value: string;
+  }
+) {
+  console.log(chalk.yellow(message));
   console.log(`Type: ${chalk.yellow(Type)}`);
   console.log(`Name: ${chalk.yellow(Name)}`);
   console.log(`Value: ${chalk.yellow(Value)}`);
