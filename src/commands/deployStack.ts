@@ -36,8 +36,6 @@ export async function deployStack() {
     ? domainConfigSchema.parse(domainConfigRaw)
     : undefined;
 
-  // TODO: Instruct the user to create second DNS record
-
   let workflowPath: string;
 
   switch (stackType) {
