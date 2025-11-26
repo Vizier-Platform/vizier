@@ -13,16 +13,16 @@ import {
   type BucketAndServerOutputs,
   type ConfigFrontBack,
   bucketAndServerOutputsSchema,
+  type DomainConfig,
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/readWrite.js";
 
-export async function deployFrontendWithServerFromConfig({
-  projectId,
-  assetDirectory,
-  dockerfileDirectory,
-}: ConfigFrontBack) {
+export async function deployFrontendWithServerFromConfig(
+  { projectId, assetDirectory, dockerfileDirectory }: ConfigFrontBack,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
   const absoluteDockerfileDirectory = path.join(
     process.cwd(),
@@ -34,6 +34,7 @@ export async function deployFrontendWithServerFromConfig({
     assetDirectory: absoluteAssetDirectory,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
@@ -44,6 +45,7 @@ interface FrontendWithServerOptions {
   assetDirectory: string;
   dockerfilePath: string;
   containerPort: number;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployFrontendWithServer({
@@ -51,6 +53,7 @@ export async function deployFrontendWithServer({
   assetDirectory,
   dockerfilePath,
   containerPort,
+  domainConfig,
 }: FrontendWithServerOptions): Promise<BucketAndServerOutputs> {
   await requireDocker();
 
@@ -76,7 +79,11 @@ export async function deployFrontendWithServer({
       }
     );
 
-    const distribution = defineDistribution(stack, { bucket, fargateService });
+    const distribution = defineDistribution(stack, {
+      bucket,
+      fargateService,
+      domainConfig,
+    });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,

@@ -6,20 +6,22 @@ import {
   type ConfigFront,
   type BucketOutputs,
   bucketOutputsSchema,
+  type DomainConfig,
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 
-export async function deployFrontendFromConfig({
-  projectId,
-  assetDirectory,
-}: ConfigFront) {
+export async function deployFrontendFromConfig(
+  { projectId, assetDirectory }: ConfigFront,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
 
   const returnedOutputs = await deployFrontend({
     stackName: projectId,
     assetDirectory: absoluteAssetDirectory,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
@@ -28,11 +30,13 @@ export async function deployFrontendFromConfig({
 interface FrontendOptions {
   stackName: string;
   assetDirectory: string;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployFrontend({
   stackName,
   assetDirectory,
+  domainConfig,
 }: FrontendOptions): Promise<BucketOutputs> {
   const toolkit = new Toolkit();
 
@@ -42,7 +46,7 @@ export async function deployFrontend({
 
     const bucket = defineBucket(stack, assetDirectory);
 
-    const distribution = defineDistribution(stack, { bucket });
+    const distribution = defineDistribution(stack, { bucket, domainConfig });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,

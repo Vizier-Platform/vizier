@@ -2,7 +2,12 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import { deployFrontendFromConfig } from "../aws/stacks/frontend.js";
 import { readProperties, writeText } from "../utils/readWrite.js";
-import { type Config, configSchema } from "../types/index.js";
+import {
+  type Config,
+  configSchema,
+  type DomainConfig,
+  domainConfigSchema,
+} from "../types/index.js";
 import { deployFrontendWithServerFromConfig } from "../aws/stacks/frontendWithServer.js";
 import { deployServerFromConfig } from "../aws/stacks/server.js";
 import { deployServerWithDatabaseFromConfig } from "../aws/stacks/serverWithDatabase.js";
@@ -24,35 +29,47 @@ export async function deployStack() {
   );
   const { stackType } = config;
 
+  const domainConfigRaw = readProperties(".vizier/domain.json");
+  const domainConfig: DomainConfig | undefined = domainConfigSchema.safeParse(
+    domainConfigRaw
+  ).success
+    ? domainConfigSchema.parse(domainConfigRaw)
+    : undefined;
+
+  // TODO: Instruct the user to create second DNS record
+
   let workflowPath: string;
 
   switch (stackType) {
     case "front": {
-      await deployFrontendFromConfig(config);
+      await deployFrontendFromConfig(config, domainConfig);
       console.log(chalk.green(`Static site deployed.`));
       workflowPath = "../templates/syncAssets.yml";
       break;
     }
     case "front+back": {
-      await deployFrontendWithServerFromConfig(config);
+      await deployFrontendWithServerFromConfig(config, domainConfig);
       console.log(chalk.green(`Frontend and backend deployed.`));
       workflowPath = "../templates/syncAssetsBuildImage.yml";
       break;
     }
     case "back": {
-      await deployServerFromConfig(config);
+      await deployServerFromConfig(config, domainConfig);
       console.log(chalk.green(`Server deployed.`));
       workflowPath = "../templates/buildImage.yml";
       break;
     }
     case "back+db": {
-      await deployServerWithDatabaseFromConfig(config);
+      await deployServerWithDatabaseFromConfig(config, domainConfig);
       console.log(chalk.green(`Server with database deployed.`));
       workflowPath = "../templates/buildImage.yml";
       break;
     }
     case "front+back+db": {
-      await deployFrontendWithServerWithDatabaseFromConfig(config);
+      await deployFrontendWithServerWithDatabaseFromConfig(
+        config,
+        domainConfig
+      );
       console.log(chalk.green(`Frontend, backend, and database deployed.`));
       workflowPath = "../templates/syncAssetsBuildImage.yml";
       break;

@@ -14,16 +14,16 @@ import {
   type ConfigFrontBackDb,
   bucketAndServerOutputsSchema,
   type BucketAndServerOutputs,
+  type DomainConfig,
 } from "../../types/index.js";
 import path from "path";
 import { writeProperties } from "../../utils/readWrite.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 
-export async function deployFrontendWithServerWithDatabaseFromConfig({
-  projectId,
-  assetDirectory,
-  dockerfileDirectory,
-}: ConfigFrontBackDb) {
+export async function deployFrontendWithServerWithDatabaseFromConfig(
+  { projectId, assetDirectory, dockerfileDirectory }: ConfigFrontBackDb,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
   const absoluteDockerfileDirectory = path.join(
     process.cwd(),
@@ -35,6 +35,7 @@ export async function deployFrontendWithServerWithDatabaseFromConfig({
     assetDirectory: absoluteAssetDirectory,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
@@ -45,6 +46,7 @@ interface FullstackOptions {
   assetDirectory: string;
   dockerfilePath: string;
   containerPort: number;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployFrontendWithServerWithDatabase({
@@ -52,6 +54,7 @@ export async function deployFrontendWithServerWithDatabase({
   assetDirectory,
   dockerfilePath,
   containerPort,
+  domainConfig,
 }: FullstackOptions): Promise<BucketAndServerOutputs> {
   await requireDocker();
 
@@ -84,7 +87,11 @@ export async function deployFrontendWithServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, { bucket, fargateService });
+    const distribution = defineDistribution(stack, {
+      bucket,
+      fargateService,
+      domainConfig,
+    });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,

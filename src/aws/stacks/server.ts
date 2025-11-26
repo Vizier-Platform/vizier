@@ -10,6 +10,7 @@ import {
 import {
   serverOutputsSchema,
   type ConfigBack,
+  type DomainConfig,
   type ServerOutputs,
 } from "../../types/index.js";
 import path from "path";
@@ -17,10 +18,10 @@ import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/readWrite.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 
-export async function deployServerFromConfig({
-  projectId,
-  dockerfileDirectory,
-}: ConfigBack) {
+export async function deployServerFromConfig(
+  { projectId, dockerfileDirectory }: ConfigBack,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteDockerfileDirectory = path.join(
     process.cwd(),
     dockerfileDirectory
@@ -30,6 +31,7 @@ export async function deployServerFromConfig({
     stackName: projectId,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
@@ -39,12 +41,14 @@ interface ServerOptions {
   stackName: string;
   dockerfilePath: string;
   containerPort: number;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployServer({
   stackName,
   dockerfilePath,
   containerPort,
+  domainConfig,
 }: ServerOptions): Promise<ServerOutputs> {
   await requireDocker();
 
@@ -70,7 +74,10 @@ export async function deployServer({
       }
     );
 
-    const distribution = defineDistribution(stack, { fargateService });
+    const distribution = defineDistribution(stack, {
+      fargateService,
+      domainConfig,
+    });
 
     new CfnOutput(stack, "CloudFrontUrl", {
       value: `http://${distribution.domainName}`,
