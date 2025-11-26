@@ -33,7 +33,11 @@ export async function deleteCertificate(certArn: string): Promise<void> {
 }
 
 type ValidationDetails = acm.DomainValidation & {
-  ResourceRecord: acm.ResourceRecord;
+  ResourceRecord: acm.ResourceRecord & {
+    Type: string;
+    Name: string;
+    Value: string;
+  };
   ValidationStatus: string;
 };
 
@@ -52,9 +56,15 @@ export async function getCertificateDomainValidation(
   for (let i = 0; i < 10; i++) {
     certDetails = await acmClient.send(describeCertCommand);
 
-    const options = certDetails.Certificate?.DomainValidationOptions || [];
+    const validation = certDetails.Certificate?.DomainValidationOptions?.[0];
 
-    if (options[0] && options[0].ResourceRecord) {
+    if (
+      validation?.ValidationStatus &&
+      validation.ResourceRecord &&
+      validation.ResourceRecord.Type &&
+      validation.ResourceRecord.Name &&
+      validation.ResourceRecord.Value
+    ) {
       break;
     }
 
@@ -64,13 +74,23 @@ export async function getCertificateDomainValidation(
   const domainValidation =
     certDetails?.Certificate?.DomainValidationOptions?.[0];
 
-  if (!domainValidation?.ResourceRecord || !domainValidation.ValidationStatus) {
+  if (
+    !domainValidation?.ValidationStatus ||
+    !domainValidation.ResourceRecord ||
+    !domainValidation.ResourceRecord.Type ||
+    !domainValidation.ResourceRecord.Name ||
+    !domainValidation.ResourceRecord.Value
+  ) {
     throw new Error("Failed to get domain validation options for certificate");
   }
 
   return {
     ...domainValidation,
-    ResourceRecord: domainValidation.ResourceRecord,
+    ResourceRecord: {
+      Type: domainValidation.ResourceRecord.Type,
+      Name: domainValidation.ResourceRecord.Name,
+      Value: domainValidation.ResourceRecord.Value,
+    },
     ValidationStatus: domainValidation.ValidationStatus,
   };
 }

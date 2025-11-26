@@ -29,15 +29,8 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
       const validation = await getCertificateDomainValidation(certArn);
 
       console.log(chalk.green(`Certificate requested successfully!`));
-      console.log(
-        chalk.yellow(
-          `To validate domain ownership, please create the following DNS record:`
-        )
-      );
 
-      console.log(chalk.yellow(`Type: ${validation.ResourceRecord.Type}`));
-      console.log(chalk.yellow(`Name: ${validation.ResourceRecord.Name}`));
-      console.log(chalk.yellow(`Value: ${validation.ResourceRecord.Value}`));
+      printDnsRecordInstructions(validation.ResourceRecord);
 
       console.log(
         chalk.yellow(
@@ -89,4 +82,19 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
         )
       );
     });
+}
+
+export function printDnsRecordInstructions({
+  Type,
+  Name,
+  Value,
+}: {
+  Type: string;
+  Name: string;
+  Value: string;
+}) {
+  console.log(chalk.yellow(`Please create the following DNS record:`));
+  console.log(`Type: ${chalk.yellow(Type)}`);
+  console.log(`Name: ${chalk.yellow(Name)}`);
+  console.log(`Value: ${chalk.yellow(Value)}`);
 }
