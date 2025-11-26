@@ -18,6 +18,7 @@ import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/readWrite.js";
 import { defineDistribution } from "./partials/cloudfront.js";
+import { printDnsRecordInstructions } from "../../commands/domainSetup.js";
 
 export async function deployServerWithDatabaseFromConfig(
   { projectId, dockerfileDirectory }: ConfigBackDb,
@@ -36,6 +37,17 @@ export async function deployServerWithDatabaseFromConfig(
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
+
+  if (domainConfig) {
+    printDnsRecordInstructions(
+      "To direct traffic to your custom domain, make sure you create the following DNS record:",
+      {
+        Type: "CNAME",
+        Name: domainConfig.domainName,
+        Value: returnedOutputs.cloudfrontDomain,
+      }
+    );
+  }
 }
 
 interface DBServerOptions {
