@@ -62,6 +62,6 @@ export async function deployFrontend({
   await toolkit.deploy(cloudAssemblySource);
 
   return bucketOutputsSchema.parse(
-    await getOutputsFromStack(stackName, ["bucketName"])
+    await getOutputsFromStack(stackName, ["bucketName", "cloudfrontDomain"])
   );
 }

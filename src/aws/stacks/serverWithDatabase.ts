@@ -109,6 +109,7 @@ export async function deployServerWithDatabase({
       "repositoryUri",
       "clusterName",
       "serviceName",
+      "cloudfrontDomain",
     ])
   );
 }

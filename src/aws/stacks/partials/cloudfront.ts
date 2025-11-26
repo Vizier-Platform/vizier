@@ -1,4 +1,4 @@
-import { Stack, Duration } from "aws-cdk-lib";
+import { Stack, Duration, CfnOutput } from "aws-cdk-lib";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
@@ -82,6 +82,10 @@ export function defineDistribution(stack: Stack, options: DistributionOptions) {
       }
     );
   }
+
+  new CfnOutput(stack, "cloudfrontDomain", {
+    value: distribution.domainName,
+  });
 
   return distribution;
 }

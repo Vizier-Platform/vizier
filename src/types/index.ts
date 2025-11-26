@@ -54,12 +54,16 @@ export const configSchema = z.discriminatedUnion("stackType", [
 ]);
 export type Config = z.infer<typeof configSchema>;
 
-export const bucketOutputsSchema = z.object({
+export const baseOutputsSchema = z.object({
+  cloudfrontDomain: z.string(),
+});
+
+export const bucketOutputsSchema = baseOutputsSchema.extend({
   bucketName: z.string(),
 });
 export type BucketOutputs = z.infer<typeof bucketOutputsSchema>;
 
-export const serverOutputsSchema = z.object({
+export const serverOutputsSchema = baseOutputsSchema.extend({
   repositoryUri: z.string(),
   clusterName: z.string(),
   serviceName: z.string(),
