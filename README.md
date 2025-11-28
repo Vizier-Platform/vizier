@@ -78,7 +78,7 @@ You are able to manually update your AWS resources by re-running:
 In order to integrate into your existing CI/CD workflow, Vizier utilizes Github Actions to update your resources so you can simply run:
 
 - `git push`  
-   The workflow files will be created within your project's `.github` folder upon `vizier deploy`. If not already included, add `.github/` to your `.gitignore` file. The specific Vizier file created is `.github/workflows/vizier.json`.  
+   The workflow files will be created within your project's `.github` folder upon `vizier deploy`. If not already included, add `.github/` to your `.gitignore` file. The specific Vizier file created is `.github/workflows/vizier.yml`.  
   Follow the instructions below to facilitate GH actions' deployment.
 
 ### Allowing Github Actions to Function
