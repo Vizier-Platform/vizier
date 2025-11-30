@@ -26,27 +26,33 @@ export function defineDistribution(stack: Stack, options: DistributionOptions) {
         });
 
   let distributionProps: cloudfront.DistributionProps = {
-    defaultRootObject: "index.html",
     defaultBehavior: {
       origin: defaultOrigin,
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
     },
-    errorResponses: [
-      {
-        httpStatus: 403,
-        responseHttpStatus: 200,
-        responsePagePath: "/index.html",
-        ttl: Duration.seconds(0),
-      },
-      {
-        httpStatus: 404,
-        responseHttpStatus: 200,
-        responsePagePath: "/index.html",
-        ttl: Duration.seconds(0),
-      },
-    ],
   };
+
+  if ("bucket" in options) {
+    distributionProps = {
+      ...distributionProps,
+      defaultRootObject: "index.html",
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+          ttl: Duration.seconds(0),
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+          ttl: Duration.seconds(0),
+        },
+      ],
+    };
+  }
 
   if (options.domainConfig) {
     const certificate = acm.Certificate.fromCertificateArn(
