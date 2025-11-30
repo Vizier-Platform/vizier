@@ -1,50 +1,54 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { App, CfnOutput, Stack } from "aws-cdk-lib";
 import path from "node:path";
-import S3ClientService from "../s3.js";
-import { readProperties, writeProperties } from "../../utils/readWrite.js";
+import { writeProperties } from "../../utils/readWrite.js";
 import {
   type ConfigFront,
   type BucketOutputs,
   bucketOutputsSchema,
+  type DomainConfig,
 } from "../../types/index.js";
 import { defineBucket } from "./partials/bucket.js";
 import { defineDistribution } from "./partials/cloudfront.js";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
+import { printDnsRecordInstructions } from "../../commands/domainSetup.js";
 
-export async function deployFrontendFromConfig({
-  projectId,
-  assetDirectory,
-}: ConfigFront) {
+export async function deployFrontendFromConfig(
+  { projectId, assetDirectory }: ConfigFront,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
-  const existingOutputs = readProperties(".vizier/outputs.json");
-  const parsedOutputs = bucketOutputsSchema.safeParse(existingOutputs);
 
-  if (parsedOutputs.success) {
-    const s3Service = new S3ClientService();
+  const returnedOutputs = await deployFrontend({
+    stackName: projectId,
+    assetDirectory: absoluteAssetDirectory,
+    domainConfig,
+  });
 
-    await s3Service.syncDirectory(
-      parsedOutputs.data.bucketName,
-      absoluteAssetDirectory
+  writeProperties(".vizier/outputs.json", returnedOutputs);
+
+  if (domainConfig) {
+    printDnsRecordInstructions(
+      "To direct traffic to your custom domain, make sure you create the following DNS record:",
+      {
+        Type: "CNAME",
+        Name: domainConfig.domainName,
+        Value: returnedOutputs.cloudfrontDomain,
+      }
     );
-  } else {
-    const returnedOutputs = await deployFrontend({
-      stackName: projectId,
-      assetDirectory: absoluteAssetDirectory,
-    });
-
-    writeProperties(".vizier/outputs.json", returnedOutputs);
   }
 }
 
 interface FrontendOptions {
   stackName: string;
   assetDirectory: string;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployFrontend({
   stackName,
   assetDirectory,
+  domainConfig,
 }: FrontendOptions): Promise<BucketOutputs> {
   const toolkit = new Toolkit();
 
@@ -54,7 +58,7 @@ export async function deployFrontend({
 
     const bucket = defineBucket(stack, assetDirectory);
 
-    const distribution = defineDistribution(stack, { bucket });
+    const distribution = defineDistribution(stack, { bucket, domainConfig });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
@@ -70,6 +74,6 @@ export async function deployFrontend({
   await toolkit.deploy(cloudAssemblySource);
 
   return bucketOutputsSchema.parse(
-    await getOutputsFromStack(stackName, ["bucketName"])
+    await getOutputsFromStack(stackName, ["bucketName", "cloudfrontDomain"])
   );
 }

@@ -11,17 +11,19 @@ import { defineVpc } from "./partials/vpc.js";
 import {
   serverOutputsSchema,
   type ConfigBackDb,
+  type DomainConfig,
   type ServerOutputs,
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/readWrite.js";
 import { defineDistribution } from "./partials/cloudfront.js";
+import { printDnsRecordInstructions } from "../../commands/domainSetup.js";
 
-export async function deployServerWithDatabaseFromConfig({
-  projectId,
-  dockerfileDirectory,
-}: ConfigBackDb) {
+export async function deployServerWithDatabaseFromConfig(
+  { projectId, dockerfileDirectory }: ConfigBackDb,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteDockerfileDirectory = path.join(
     process.cwd(),
     dockerfileDirectory
@@ -31,21 +33,35 @@ export async function deployServerWithDatabaseFromConfig({
     stackName: projectId,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
+
+  if (domainConfig) {
+    printDnsRecordInstructions(
+      "To direct traffic to your custom domain, make sure you create the following DNS record:",
+      {
+        Type: "CNAME",
+        Name: domainConfig.domainName,
+        Value: returnedOutputs.cloudfrontDomain,
+      }
+    );
+  }
 }
 
 interface DBServerOptions {
   stackName: string;
   dockerfilePath: string;
   containerPort: number;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployServerWithDatabase({
   stackName,
   dockerfilePath,
   containerPort,
+  domainConfig,
 }: DBServerOptions): Promise<ServerOutputs> {
   await requireDocker();
 
@@ -78,7 +94,10 @@ export async function deployServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, { fargateService });
+    const distribution = defineDistribution(stack, {
+      fargateService,
+      domainConfig,
+    });
 
     new CfnOutput(stack, "DBEndpoint", {
       value: dbInstance.dbInstanceEndpointAddress,
@@ -102,6 +121,7 @@ export async function deployServerWithDatabase({
       "repositoryUri",
       "clusterName",
       "serviceName",
+      "cloudfrontDomain",
     ])
   );
 }

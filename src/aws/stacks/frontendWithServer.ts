@@ -13,16 +13,17 @@ import {
   type BucketAndServerOutputs,
   type ConfigFrontBack,
   bucketAndServerOutputsSchema,
+  type DomainConfig,
 } from "../../types/index.js";
 import path from "path";
 import { getOutputsFromStack } from "../getOutputFromStack.js";
 import { writeProperties } from "../../utils/readWrite.js";
+import { printDnsRecordInstructions } from "../../commands/domainSetup.js";
 
-export async function deployFrontendWithServerFromConfig({
-  projectId,
-  assetDirectory,
-  dockerfileDirectory,
-}: ConfigFrontBack) {
+export async function deployFrontendWithServerFromConfig(
+  { projectId, assetDirectory, dockerfileDirectory }: ConfigFrontBack,
+  domainConfig?: DomainConfig | undefined
+) {
   const absoluteAssetDirectory = path.join(process.cwd(), assetDirectory);
   const absoluteDockerfileDirectory = path.join(
     process.cwd(),
@@ -34,9 +35,21 @@ export async function deployFrontendWithServerFromConfig({
     assetDirectory: absoluteAssetDirectory,
     dockerfilePath: absoluteDockerfileDirectory,
     containerPort: 3000,
+    domainConfig,
   });
 
   writeProperties(".vizier/outputs.json", returnedOutputs);
+
+  if (domainConfig) {
+    printDnsRecordInstructions(
+      "To direct traffic to your custom domain, make sure you create the following DNS record:",
+      {
+        Type: "CNAME",
+        Name: domainConfig.domainName,
+        Value: returnedOutputs.cloudfrontDomain,
+      }
+    );
+  }
 }
 
 interface FrontendWithServerOptions {
@@ -44,6 +57,7 @@ interface FrontendWithServerOptions {
   assetDirectory: string;
   dockerfilePath: string;
   containerPort: number;
+  domainConfig?: DomainConfig | undefined;
 }
 
 export async function deployFrontendWithServer({
@@ -51,6 +65,7 @@ export async function deployFrontendWithServer({
   assetDirectory,
   dockerfilePath,
   containerPort,
+  domainConfig,
 }: FrontendWithServerOptions): Promise<BucketAndServerOutputs> {
   await requireDocker();
 
@@ -76,7 +91,11 @@ export async function deployFrontendWithServer({
       }
     );
 
-    const distribution = defineDistribution(stack, { bucket, fargateService });
+    const distribution = defineDistribution(stack, {
+      bucket,
+      fargateService,
+      domainConfig,
+    });
 
     new CfnOutput(stack, "bucketName", {
       value: bucket.bucketName,
@@ -101,6 +120,7 @@ export async function deployFrontendWithServer({
       "repositoryUri",
       "clusterName",
       "serviceName",
+      "cloudfrontDomain",
     ])
   );
 }

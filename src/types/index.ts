@@ -54,12 +54,16 @@ export const configSchema = z.discriminatedUnion("stackType", [
 ]);
 export type Config = z.infer<typeof configSchema>;
 
-export const bucketOutputsSchema = z.object({
+export const baseOutputsSchema = z.object({
+  cloudfrontDomain: z.string(),
+});
+
+export const bucketOutputsSchema = baseOutputsSchema.extend({
   bucketName: z.string(),
 });
 export type BucketOutputs = z.infer<typeof bucketOutputsSchema>;
 
-export const serverOutputsSchema = z.object({
+export const serverOutputsSchema = baseOutputsSchema.extend({
   repositoryUri: z.string(),
   clusterName: z.string(),
   serviceName: z.string(),
@@ -72,6 +76,12 @@ export const bucketAndServerOutputsSchema = bucketOutputsSchema.extend(
 export type BucketAndServerOutputs = z.infer<
   typeof bucketAndServerOutputsSchema
 >;
+
+export const domainConfigSchema = z.object({
+  domainName: z.string(),
+  certArn: z.string(),
+});
+export type DomainConfig = z.infer<typeof domainConfigSchema>;
 
 export const STACK_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
 export const STACK_NAME_INVALID_CHARACTER_PATTERN = /[^A-Za-z0-9-]/g;
