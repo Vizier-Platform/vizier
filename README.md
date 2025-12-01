@@ -114,20 +114,26 @@ Initialize project:
 
 - `vizier init`
 - `vizier deploy`  
-  (skip if you wish to immediately set up a domain, without first testing your deployment)
+  (Skip if you wish to immediately set up a domain, without first testing your deployment.)
 
 Set up domain:
 
 - `vizier domain-setup`  
-  provisions a TLS certificate and instructs you to create a DNS record for it
+  Provisions a TLS certificate and instructs you to create a DNS record for it.
 - `vizier deploy`  
-  updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain
+  Updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain.
 
 #### Removing a Custom Domain
 
-`vizier domain-remove` to only remove the domain  
-OR  
-`vizier destroy` removes the domain while destroying deployed resources
+Either:
+
+- `vizier domain-remove`  
+  Removes the domain but leaves resources deployed.
+
+OR
+
+- `vizier destroy`  
+  Removes the domain while destroying deployed resources.
 
 ### Teardown
 
