@@ -99,6 +99,33 @@ You must add your AWS account information as Repository Secrets.
   - The region of AWS you intend to deploy the site in, such as `us-east-1`.  
     Once these secrets are created within your corresponding Github Repo, vizier will automatically update your AWS resources when you run `git push`.
 
+### Custom Domain
+
+To deploy your project on a custom domain, you must:
+
+- have a domain registered
+- be able to create new DNS (CNAME) records for that domain
+
+#### Setting Up a Custom Domain
+
+Initialize project:
+
+- `vizier init`
+- `vizier deploy` (skip if you wish to immediately set up a domain, without first testing your deployment)
+
+Set up domain:
+
+- `vizier domain-setup`: provisions a TLS certificate and instructs you to create a DNS record for it
+- `vizier deploy`: updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain
+
+#### Removing a Custom Domain
+
+- `vizier domain-remove` to only remove the domain
+
+OR
+
+- `vizier destroy` removes the domain while destroying deployed resources
+
 ### Teardown
 
 To destroy a project deployed by Vizier, run:
