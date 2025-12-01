@@ -113,15 +113,14 @@ To deploy your project on a custom domain, you must:
 Initialize project:
 
 - `vizier init`
-- `vizier deploy`  
-  (Skip if you wish to immediately set up a domain, without first testing your deployment.)
+- `vizier deploy` (optional)
 
 Set up domain:
 
 - `vizier domain-setup`  
   Provisions a TLS certificate and instructs you to create a DNS record for it.
 - `vizier deploy`  
-  Updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain.
+  This is mandatory after domain setup, even if you are using Vizier's GitHub actions for automated redeployment. It updates your resources to use the certificate created in the prior step, and instructs you to create a DNS record pointing your domain at the Cloudfront domain.
 
 #### Removing a Custom Domain
 
