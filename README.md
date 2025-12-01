@@ -43,19 +43,22 @@ If deploying a Database:
 
 Once vizier is installed, navigate to the root of your project.
 
-- `vizier init`
-  - Answer prompts regarding project type.  
-    `static site`
-  - Basic frontend-only website served via a combination of an S3 bucket and Cloudfront distribution.  
-    `static frontend + server`
-  - Combines the frontend S3 Bucket with Cloudfront, VPC, ECS, and Fargate.  
-    `server only`
-  - Can be used for projects where the frontend is served within the backend or backend-only projects. Uses the same stack of Cloudfront, VPC, ECS, Fargate, without the S3 bucket.  
-    `server with database`
-  - Combines the server stack with an RDS instance, assumes postgres for the database.  
-    `static frontend + server with database`
-  - Combines all of the above into a full stack: S3 bucket, Cloudfront distribution, VPC, ECS, Fargate, and an RDS instance.
-    This will create a `.vizier/` folder at your project root, containing your project configuration & information.
+- `vizier init`  
+  Answer prompts regarding project type.
+
+Project types include:
+
+- `static site`  
+  Basic frontend-only website served via a combination of an S3 bucket and Cloudfront distribution.
+- `static frontend + server`  
+  Combines the frontend S3 Bucket with Cloudfront, VPC, ECS, and Fargate.
+- `server only`  
+  Can be used for projects where the frontend is served within the backend or backend-only projects. Uses the same stack of Cloudfront, VPC, ECS, Fargate, without the S3 bucket.
+- `server with database`  
+  Combines the server stack with an RDS instance, assumes postgres for the database.
+- `static frontend + server with database`  
+  Combines all of the above into a full stack: S3 bucket, Cloudfront distribution, VPC, ECS, Fargate, and an RDS instance.
+  This will create a `.vizier/` folder at your project root, containing your project configuration & information.
 
 ### Deploying a Site
 
@@ -77,8 +80,7 @@ You are able to manually update your AWS resources by re-running:
 
 Vizier utilizes Github Actions to automate your deployment process, so you can simply run:
 
-- `git push`
-
+- `git push`  
   The workflow files will be created within your project's `.github` folder upon `vizier deploy`. The specific Vizier file created is `.github/workflows/vizier.yml`. The new or updated `.github` folder will be pushed to Github on your next `git push`, updating your Github Actions.
   Follow the instructions below to facilitate GH actions' deployment.
 
@@ -111,20 +113,21 @@ To deploy your project on a custom domain, you must:
 Initialize project:
 
 - `vizier init`
-- `vizier deploy` (skip if you wish to immediately set up a domain, without first testing your deployment)
+- `vizier deploy`  
+  (skip if you wish to immediately set up a domain, without first testing your deployment)
 
 Set up domain:
 
-- `vizier domain-setup`: provisions a TLS certificate and instructs you to create a DNS record for it
-- `vizier deploy`: updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain
+- `vizier domain-setup`  
+  provisions a TLS certificate and instructs you to create a DNS record for it
+- `vizier deploy`  
+  updates the stack to use the certificate, and instructs you to create a DNS record pointing your domain at the Cloudfront domain
 
 #### Removing a Custom Domain
 
-- `vizier domain-remove` to only remove the domain
-
-OR
-
-- `vizier destroy` removes the domain while destroying deployed resources
+`vizier domain-remove` to only remove the domain  
+OR  
+`vizier destroy` removes the domain while destroying deployed resources
 
 ### Teardown
 
