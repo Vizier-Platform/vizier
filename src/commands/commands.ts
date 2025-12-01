@@ -8,11 +8,6 @@ import { loadDomainSetupCommand } from "./domainSetup.js";
 import { loadDomainRemoveCommand } from "./domainRemove.js";
 
 export const loadCommands = (program: Command) => {
-  // command names specified here so that they are
-  // - all visible in one place
-  // - decoupled from behavior definitions
-  // "help" is provided by commander
-
   loadInitCommand(program, "init");
   loadDeployCommand(program, "deploy");
   loadDomainSetupCommand(program, "domain-setup");

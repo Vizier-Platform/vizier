@@ -23,11 +23,11 @@ export function defineDb(
 
   const dbInstance = new rds.DatabaseInstance(stack, "DatabaseInstance", {
     engine: rds.DatabaseInstanceEngine.postgres({
-      version: rds.PostgresEngineVersion.VER_17_6, // perhaps allow user to choose psql ver?
+      version: rds.PostgresEngineVersion.VER_17_6,
     }),
     instanceType: ec2.InstanceType.of(
-      ec2.InstanceClass.BURSTABLE3, // consider altering instanceClass to server wider range of apps
-      ec2.InstanceSize.SMALL // as above
+      ec2.InstanceClass.BURSTABLE3,
+      ec2.InstanceSize.SMALL
     ),
     vpc: vpc as ec2.IVpc,
     vpcSubnets: {
@@ -37,7 +37,7 @@ export function defineDb(
     maxAllocatedStorage: 100,
     securityGroups: [dbSecurityGroup],
     deleteAutomatedBackups: true,
-    removalPolicy: RemovalPolicy.DESTROY, // might want to remove for prod apps
+    removalPolicy: RemovalPolicy.DESTROY,
     databaseName: DB_NAME,
     credentials: rds.Credentials.fromGeneratedSecret("postgres"),
   });
