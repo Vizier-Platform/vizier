@@ -99,14 +99,6 @@ export async function deployServerWithDatabase({
       domainConfig,
     });
 
-    new CfnOutput(stack, "DBEndpoint", {
-      value: dbInstance.dbInstanceEndpointAddress,
-    });
-
-    new CfnOutput(stack, "AlbUrl", {
-      value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
-    });
-
     return app.synth();
   });
 

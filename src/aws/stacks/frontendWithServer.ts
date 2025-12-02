@@ -97,10 +97,6 @@ export async function deployFrontendWithServer({
       domainConfig,
     });
 
-    new CfnOutput(stack, "AlbUrl", {
-      value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
-    });
-
     return app.synth();
   });
 
