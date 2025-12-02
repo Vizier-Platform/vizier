@@ -18,24 +18,15 @@ type DistributionOptions = OriginOptions & {
 };
 
 export function defineDistribution(stack: Stack, options: DistributionOptions) {
-  const defaultOrigin =
-    "bucket" in options
-      ? new origins.S3StaticWebsiteOrigin(options.bucket)
-      : new origins.LoadBalancerV2Origin(options.fargateService.loadBalancer, {
-          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-        });
-
-  let distributionProps: cloudfront.DistributionProps = {
-    defaultBehavior: {
-      origin: defaultOrigin,
-      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-    },
-  };
+  let distributionProps: cloudfront.DistributionProps;
 
   if ("bucket" in options) {
     distributionProps = {
-      ...distributionProps,
+      defaultBehavior: {
+        origin: new origins.S3StaticWebsiteOrigin(options.bucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      },
       defaultRootObject: "index.html",
       errorResponses: [
         {
@@ -51,6 +42,20 @@ export function defineDistribution(stack: Stack, options: DistributionOptions) {
           ttl: Duration.seconds(0),
         },
       ],
+    };
+  } else {
+    distributionProps = {
+      defaultBehavior: {
+        origin: new origins.LoadBalancerV2Origin(
+          options.fargateService.loadBalancer,
+          {
+            protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          }
+        ),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+      },
     };
   }
 
