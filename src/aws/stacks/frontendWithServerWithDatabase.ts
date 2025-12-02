@@ -113,10 +113,6 @@ export async function deployFrontendWithServerWithDatabase({
       value: dbInstance.dbInstanceEndpointAddress,
     });
 
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `https://${distribution.domainName}`,
-    });
-
     new CfnOutput(stack, "AlbUrl", {
       value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
     });

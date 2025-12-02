@@ -64,10 +64,6 @@ export async function deployFrontend({
       value: bucket.bucketName,
     });
 
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `https://${distribution.domainName}`,
-    });
-
     return app.synth();
   });
 

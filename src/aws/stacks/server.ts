@@ -91,10 +91,6 @@ export async function deployServer({
       domainConfig,
     });
 
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `http://${distribution.domainName}`,
-    });
-
     return app.synth();
   });
 
