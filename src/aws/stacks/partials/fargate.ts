@@ -18,9 +18,9 @@ export function defineCluster(stack: Stack, vpc: ec2.Vpc) {
 }
 
 export function defineFargateSecurityGroup(stack: Stack, vpc: ec2.Vpc) {
-  return new ec2.SecurityGroup(stack, "FargateSecurityGroup", {
+  return new ec2.SecurityGroup(stack, "ServerSecurityGroup", {
     vpc: vpc as ec2.IVpc,
-    description: "Fargate tasks security group",
+    description: "Fargate task security group",
     allowAllOutbound: true,
   });
 }
@@ -63,14 +63,14 @@ export function defineFargateService(
       }
     : {};
 
-  const asset = new DockerImageAsset(stack, "ImageName", {
+  const asset = new DockerImageAsset(stack, "ServerImage", {
     directory: dockerfilePath,
     platform: Platform.LINUX_AMD64,
   });
 
-  const repository = new ecr.Repository(stack, "MyRepository");
+  const repository = new ecr.Repository(stack, "ServerImageRepo");
 
-  new ecrdeploy.ECRDeployment(stack, "DeployDockerImage", {
+  new ecrdeploy.ECRDeployment(stack, "DeployServerImage", {
     src: new ecrdeploy.DockerImageName(asset.imageUri) as ecrdeploy.IImageName,
     dest: new ecrdeploy.DockerImageName(
       `${repository.repositoryUri}:latest`
@@ -81,7 +81,7 @@ export function defineFargateService(
 
   const fargateService = new ecsPatterns.ApplicationLoadBalancedFargateService(
     stack,
-    "VizierFargateService",
+    "ServerALBFargateService",
     {
       cluster: cluster as ecs.ICluster,
       memoryLimitMiB: 1024,
