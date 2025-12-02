@@ -99,8 +99,8 @@ export function printDnsRecordInstructions(
     Value: string;
   }
 ) {
-  console.log(chalk.magenta(message));
-  console.log(`Type: ${chalk.magenta(Type)}`);
-  console.log(`Name: ${chalk.magenta(Name)}`);
-  console.log(`Value: ${chalk.magenta(Value)}`);
+  console.log(chalk.cyan(message));
+  console.log(`Type: ${chalk.cyan(Type)}`);
+  console.log(`Name: ${chalk.cyan(Name)}`);
+  console.log(`Value: ${chalk.cyan(Value)}`);
 }
