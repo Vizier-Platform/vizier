@@ -14,7 +14,7 @@ export function loadDestroyCommand(program: Command, commandName: string) {
       console.log(chalk.yellow("Stack destroyed."));
 
       deletePath(".github/workflows/vizier.yml");
-      console.log("GitHub Actions workflow removed.");
+      console.log(chalk.yellow("GitHub Actions workflow removed."));
 
       const domainConfigRaw = readProperties(".vizier/domain.json");
       const domainConfig: DomainConfig | undefined =
@@ -26,7 +26,7 @@ export function loadDestroyCommand(program: Command, commandName: string) {
         console.log(chalk.blue("Deleting certificate from ACM..."));
         await deleteCertificate(domainConfig.certArn);
         deletePath(".vizier/domain.json");
-        console.log("Domain configuration removed.");
+        console.log(chalk.yellow("Domain configuration removed."));
       }
     });
 }

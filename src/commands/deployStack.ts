@@ -86,7 +86,9 @@ export async function deployStack() {
 
   writeText(".github/workflows/vizier.yml", workflowText);
   console.log(
-    "GitHub Actions workflow written to .github/workflows/vizier.yml"
+    chalk.green(
+      "GitHub Actions workflow written to .github/workflows/vizier.yml"
+    )
   );
   console.log("Use git push to trigger the re-deployment workflow.");
 }

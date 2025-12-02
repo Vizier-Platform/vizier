@@ -80,7 +80,7 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
       );
 
       console.log(
-        chalk.blue(
+        chalk.yellow(
           `Run 'vizier deploy' to deploy your application with your custom domain.`
         )
       );

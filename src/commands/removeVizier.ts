@@ -14,11 +14,11 @@ export function loadRemoveVizierCommand(program: Command, commandName: string) {
       });
 
       if (!confirmation) {
-        console.log("Operation cancelled.");
+        console.log(chalk.yellow("Operation cancelled."));
         return;
       }
 
       deletePath(".vizier");
-      console.log("Vizier configuration removed from project.");
+      console.log(chalk.yellow("Vizier configuration removed from project."));
     });
 }
