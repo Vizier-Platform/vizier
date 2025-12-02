@@ -105,10 +105,6 @@ export async function deployFrontendWithServerWithDatabase({
       domainConfig,
     });
 
-    new CfnOutput(stack, "bucketName", {
-      value: bucket.bucketName,
-    });
-
     new CfnOutput(stack, "DBEndpoint", {
       value: dbInstance.dbInstanceEndpointAddress,
     });
