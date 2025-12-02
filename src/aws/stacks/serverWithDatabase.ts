@@ -1,5 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, Stack } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import { defineDb } from "./partials/db.js";
 import {
   defineCluster,
@@ -94,21 +94,9 @@ export async function deployServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, {
+    defineDistribution(stack, {
       fargateService,
       domainConfig,
-    });
-
-    new CfnOutput(stack, "DBEndpoint", {
-      value: dbInstance.dbInstanceEndpointAddress,
-    });
-
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `http://${distribution.domainName}`,
-    });
-
-    new CfnOutput(stack, "AlbUrl", {
-      value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
     });
 
     return app.synth();

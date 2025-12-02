@@ -1,4 +1,4 @@
-import { App, Stack, CfnOutput } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { defineBucket } from "./partials/bucket.js";
 import { defineVpc } from "./partials/vpc.js";
@@ -91,22 +91,10 @@ export async function deployFrontendWithServer({
       }
     );
 
-    const distribution = defineDistribution(stack, {
+    defineDistribution(stack, {
       bucket,
       fargateService,
       domainConfig,
-    });
-
-    new CfnOutput(stack, "bucketName", {
-      value: bucket.bucketName,
-    });
-
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `https://${distribution.domainName}`,
-    });
-
-    new CfnOutput(stack, "AlbUrl", {
-      value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
     });
 
     return app.synth();

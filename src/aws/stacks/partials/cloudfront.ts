@@ -93,5 +93,9 @@ export function defineDistribution(stack: Stack, options: DistributionOptions) {
     value: distribution.domainName,
   });
 
+  new CfnOutput(stack, "CloudFrontUrl", {
+    value: `https://${distribution.domainName}`,
+  });
+
   return distribution;
 }

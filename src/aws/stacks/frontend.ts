@@ -1,5 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, Stack } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import path from "node:path";
 import { writeProperties } from "../../utils/readWrite.js";
 import {
@@ -58,15 +58,7 @@ export async function deployFrontend({
 
     const bucket = defineBucket(stack, assetDirectory);
 
-    const distribution = defineDistribution(stack, { bucket, domainConfig });
-
-    new CfnOutput(stack, "bucketName", {
-      value: bucket.bucketName,
-    });
-
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `https://${distribution.domainName}`,
-    });
+    defineDistribution(stack, { bucket, domainConfig });
 
     return app.synth();
   });
