@@ -1,5 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, Stack } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import requireDocker from "../../utils/requireDocker.js";
 import { defineVpc } from "./partials/vpc.js";
 import {
@@ -86,13 +86,9 @@ export async function deployServer({
       }
     );
 
-    const distribution = defineDistribution(stack, {
+    defineDistribution(stack, {
       fargateService,
       domainConfig,
-    });
-
-    new CfnOutput(stack, "CloudFrontUrl", {
-      value: `http://${distribution.domainName}`,
     });
 
     return app.synth();
