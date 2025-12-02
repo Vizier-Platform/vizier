@@ -58,7 +58,7 @@ export async function deployFrontend({
 
     const bucket = defineBucket(stack, assetDirectory);
 
-    const distribution = defineDistribution(stack, { bucket, domainConfig });
+    defineDistribution(stack, { bucket, domainConfig });
 
     return app.synth();
   });

@@ -1,4 +1,4 @@
-import { App, Stack, CfnOutput } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import { Toolkit } from "@aws-cdk/toolkit-lib";
 import { defineBucket } from "./partials/bucket.js";
 import { defineVpc } from "./partials/vpc.js";
@@ -99,7 +99,7 @@ export async function deployFrontendWithServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, {
+    defineDistribution(stack, {
       bucket,
       fargateService,
       domainConfig,

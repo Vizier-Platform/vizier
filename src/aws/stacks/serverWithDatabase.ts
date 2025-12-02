@@ -1,5 +1,5 @@
 import { Toolkit } from "@aws-cdk/toolkit-lib";
-import { App, CfnOutput, Stack } from "aws-cdk-lib";
+import { App, Stack } from "aws-cdk-lib";
 import { defineDb } from "./partials/db.js";
 import {
   defineCluster,
@@ -94,7 +94,7 @@ export async function deployServerWithDatabase({
       }
     );
 
-    const distribution = defineDistribution(stack, {
+    defineDistribution(stack, {
       fargateService,
       domainConfig,
     });
