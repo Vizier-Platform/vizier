@@ -36,7 +36,7 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
       );
 
       console.log(
-        chalk.yellow(
+        chalk.magenta(
           `After creating the DNS record, it may take some time for the certificate to be validated.`
         )
       );
@@ -80,7 +80,7 @@ export function loadDomainSetupCommand(program: Command, commandName: string) {
       );
 
       console.log(
-        chalk.yellow(
+        chalk.cyan(
           `Run 'vizier deploy' to deploy your application with your custom domain.`
         )
       );
@@ -99,8 +99,8 @@ export function printDnsRecordInstructions(
     Value: string;
   }
 ) {
-  console.log(chalk.yellow(message));
-  console.log(`Type: ${chalk.yellow(Type)}`);
-  console.log(`Name: ${chalk.yellow(Name)}`);
-  console.log(`Value: ${chalk.yellow(Value)}`);
+  console.log(chalk.magenta(message));
+  console.log(`Type: ${chalk.magenta(Type)}`);
+  console.log(`Name: ${chalk.magenta(Name)}`);
+  console.log(`Value: ${chalk.magenta(Value)}`);
 }
