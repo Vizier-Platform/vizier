@@ -12,8 +12,11 @@ Vizier is a CLI tool for deploying web applications to a user's own AWS account.
 
 ### Installing Vizier
 
-In the future: NPM install globally.  
-Currently:
+From NPM:
+
+- `npm install --global @vizier-platform/cli`
+
+To build from source:
 
 - clone vizier repository
 - navigate to vizier directory

@@ -1,13 +1,13 @@
 {
-  "name": "vizier",
+  "name": "@vizier-platform/cli",
   "version": "1.0.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "vizier",
+      "name": "@vizier-platform/cli",
       "version": "1.0.0",
-      "license": "ISC",
+      "license": "MIT",
       "dependencies": {
         "@aws-cdk/toolkit-lib": "^1.10.3",
         "@aws-sdk/client-acm": "^3.939.0",
