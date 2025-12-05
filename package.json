@@ -50,6 +50,6 @@
     "dist"
   ],
   "bin": {
-    "vizier": "./dist/index.js"
+    "vizier": "dist/index.js"
   }
 }
