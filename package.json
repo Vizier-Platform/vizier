@@ -4,7 +4,7 @@
   "description": "CLI tool for deploying web applications to a user's own AWS account",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf dist && npx tsc && cp -r src/templates dist/templates",
+    "build": "rm -rf dist && npx tsc && cp -r src/templates dist/templates && chmod +x dist/index.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
   },
