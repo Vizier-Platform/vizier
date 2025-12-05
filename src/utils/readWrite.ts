@@ -20,10 +20,7 @@ export function writeProperties(
   relativePath: string,
   properties: object
 ): void {
-  const absolutePath = path.join(process.cwd(), relativePath);
-
-  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-  fs.writeFileSync(absolutePath, JSON.stringify(properties, null, 2));
+  writeText(relativePath, JSON.stringify(properties, null, 2));
 }
 
 export function writeText(relativePath: string, text: string): void {
