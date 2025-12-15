@@ -9,6 +9,7 @@ Vizier is a CLI tool for deploying web applications to a user's own AWS account.
 - install AWS CLI and configure AWS credentials
   - Keep your AWS Access Key ID and your AWS Secret Access Key on-hand for later setup.
 - install AWS CDK CLI and run `cdk bootstrap aws://<aws-id-number>/<aws-region>`
+- install Docker to support applications with servers (only the static site can build without this)
 
 ### Installing Vizier
 
