@@ -1,6 +1,6 @@
 {
   "name": "@vizier-platform/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tool for deploying web applications to a user's own AWS account",
   "main": "index.js",
   "scripts": {
