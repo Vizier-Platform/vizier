@@ -1,10 +1,11 @@
 {
   "name": "@vizier-platform/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI tool for deploying web applications to a user's own AWS account",
   "main": "index.js",
   "scripts": {
     "build": "rm -rf dist && npx tsc && cp -r src/templates dist/templates && chmod +x dist/index.js",
+    "prepare": "npm run build",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
   },

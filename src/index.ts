@@ -3,7 +3,7 @@ import { program } from "commander";
 import { loadCommands } from "./commands/commands.js";
 
 program
-  .version("1.0.2")
+  .version("1.0.3")
   .name("vizier")
   .description("an AWS deployment platform");
 loadCommands(program);
