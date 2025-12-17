@@ -8,7 +8,7 @@ import { domainConfigSchema, type DomainConfig } from "../types/index.js";
 export function loadDestroyCommand(program: Command, commandName: string) {
   program
     .command(commandName)
-    .description("Destroy stack and associated resources.")
+    .description("destroy deployed AWS resources")
     .action(async () => {
       await destroyStackFromConfig();
       console.log(chalk.yellow("Stack destroyed."));

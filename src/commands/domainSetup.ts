@@ -12,7 +12,7 @@ import type { DomainConfig } from "../types/index.js";
 export function loadDomainSetupCommand(program: Command, commandName: string) {
   program
     .command(commandName)
-    .description("Set up your custom domain for the deployed application")
+    .description("set up custom domain")
     .action(async () => {
       const domainName = await input({
         message:
