@@ -12,7 +12,7 @@ import { deleteCertificate } from "../aws/certificates.js";
 export function loadDomainRemoveCommand(program: Command, commandName: string) {
   program
     .command(commandName)
-    .description("Remove your custom domain configuration")
+    .description("remove custom domain")
     .action(async () => {
       // read from configuration file
       const domainConfig = domainConfigSchema.parse(

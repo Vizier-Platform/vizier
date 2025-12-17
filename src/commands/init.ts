@@ -18,7 +18,7 @@ import {
 export function loadInitCommand(program: Command, commandName: string) {
   program
     .command(commandName)
-    .description("Initialize Vizier in your project root")
+    .description("initialize project (writes config to project directory)")
     .action(async () => {
       const projectName = await input({
         message: "What is the project name?",

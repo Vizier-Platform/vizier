@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 export function loadDeployCommand(program: Command, commandName: string) {
   program
     .command(commandName)
-    .description("Deploy static site to CloudFormation Stack")
+    .description("deploy project to AWS")
     .action(deployStack);
 }
 
